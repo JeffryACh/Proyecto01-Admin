@@ -1,9 +1,10 @@
 package com.example.proyecto01_administracion.ui.dashboard
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -13,11 +14,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.proyecto01_administracion.ui.theme.TextGrayLight
 import com.example.proyecto01_administracion.ui.theme.TextGrayMedium
-import com.example.proyecto01_administracion.ui.theme.AccentBlue
 
 @Composable
-fun RecentWorksCard(
-    onViewHistory: () -> Unit
+fun ConsultVehiclesCard(
+    onViewAll: () -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -33,77 +33,73 @@ fun RecentWorksCard(
             modifier = Modifier.padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            RecentWorkItem(
-                vehicle = "Toyota Hilux",
+            ConsultVehicleItem(
+                model = "Toyota Hilux",
                 plate = "ABC-123",
-                task = "Cambio de aceite",
-                date = "Hoy"
+                mileage = "125,430 km",
+                onClick = onViewAll
             )
             
             HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
             
-            RecentWorkItem(
-                vehicle = "Isuzu NPR",
-                plate = "DEF-456",
-                task = "Revisión de frenos",
-                date = "Ayer"
+            ConsultVehicleItem(
+                model = "Isuzu NPR",
+                plate = "XYZ-456",
+                mileage = "98,240 km",
+                onClick = onViewAll
             )
 
             HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
 
-            RecentWorkItem(
-                vehicle = "Volvo FH",
-                plate = "GHI-789",
-                task = "Revisión general",
-                date = "20 mayo 2026"
+            ConsultVehicleItem(
+                model = "Ford Transit",
+                plate = "DEF-789",
+                mileage = "87,650 km",
+                onClick = onViewAll
             )
 
             HistoryLink(
-                text = "Ver historial",
-                icon = Icons.Default.Build,
-                onClick = onViewHistory
+                text = "Ver todos los vehículos",
+                icon = Icons.Default.DirectionsCar,
+                onClick = onViewAll
             )
         }
     }
 }
 
 @Composable
-private fun RecentWorkItem(
-    vehicle: String,
+private fun ConsultVehicleItem(
+    model: String,
     plate: String,
-    task: String,
-    date: String
+    mileage: String,
+    onClick: () -> Unit
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(
-                    text = vehicle,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
-                Text(
-                    text = plate,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = TextGrayMedium
-                )
-            }
             Text(
-                text = task,
-                style = MaterialTheme.typography.bodyMedium,
-                color = TextGrayLight
+                text = model,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+            Text(
+                text = plate,
+                style = MaterialTheme.typography.bodySmall,
+                color = TextGrayMedium
             )
         }
         
         Text(
-            text = date,
-            style = MaterialTheme.typography.labelSmall,
-            color = TextGrayMedium
+            text = mileage,
+            style = MaterialTheme.typography.bodyMedium,
+            color = TextGrayLight,
+            fontWeight = FontWeight.Medium
         )
     }
 }

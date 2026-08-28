@@ -4,8 +4,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.FlashOn
-import androidx.compose.material.icons.filled.History
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -16,7 +16,13 @@ import com.example.proyecto01_administracion.ui.theme.StatusYellow
 import kotlinx.coroutines.launch
 
 @Composable
-fun MechanicDashboardScreen(onLogout: () -> Unit) {
+fun MechanicDashboardScreen(
+    onLogout: () -> Unit,
+    onNavigateToProfile: () -> Unit = {},
+    onNavigateToMaintenanceHistory: () -> Unit = {},
+    onNavigateToVehicleSelection: () -> Unit = {},
+    onNavigateToAlerts: () -> Unit = {}
+) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
@@ -29,13 +35,22 @@ fun MechanicDashboardScreen(onLogout: () -> Unit) {
                 onLogout = {
                     scope.launch { drawerState.close() }
                     onLogout()
+                },
+                onProfileClick = {
+                    scope.launch { drawerState.close() }
+                    onNavigateToProfile()
                 }
             )
         }
     ) {
         Scaffold(
             bottomBar = {
-                MechanicBottomNavBar(selectedItem = 0)
+                MechanicBottomNavBar(
+                    selectedItem = 0,
+                    onMaintenanceClick = onNavigateToVehicleSelection,
+                    onAlertsClick = onNavigateToAlerts,
+                    onHomeClick = { /* Already here */ }
+                )
             }
         ) { innerPadding ->
             LazyColumn(
@@ -70,25 +85,25 @@ fun MechanicDashboardScreen(onLogout: () -> Unit) {
                             label = "Pendientes",
                             value = "3",
                             accentColor = StatusYellow,
-                            onClick = { /* Navigate to Pending */ }
+                            onClick = onNavigateToMaintenanceHistory
                         )
                         StatCard(
                             modifier = Modifier.weight(1f),
                             label = "Realizados",
                             value = "12",
                             accentColor = StatusGreen,
-                            onClick = { /* Navigate to Done */ }
+                            onClick = onNavigateToMaintenanceHistory
                         )
                     }
                 }
 
                 item {
                     SectionHeader(
-                        title = "Trabajos recientes",
-                        icon = Icons.Default.History
+                        title = "Consultar vehículos",
+                        icon = Icons.Default.DirectionsCar
                     )
-                    RecentWorksCard(
-                        onViewHistory = { /* Navigate to History */ }
+                    ConsultVehiclesCard(
+                        onViewAll = onNavigateToVehicleSelection
                     )
                 }
 
@@ -98,8 +113,8 @@ fun MechanicDashboardScreen(onLogout: () -> Unit) {
                         icon = Icons.Default.FlashOn
                     )
                     QuickActionsCard(
-                        onRegisterMaintenance = { /* Navigate to Register Form */ },
-                        onViewHistory = { /* Navigate to History */ }
+                        onRegisterMaintenance = onNavigateToVehicleSelection,
+                        onViewHistory = onNavigateToMaintenanceHistory
                     )
                 }
             }

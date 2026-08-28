@@ -33,7 +33,8 @@ import com.example.proyecto01_administracion.ui.theme.TextWhite
 fun LoginScreen(
     onLoginAsDriver: () -> Unit,
     onLoginAsMechanic: () -> Unit,
-    onLoginAsFleetManager: () -> Unit
+    onLoginAsFleetManager: () -> Unit,
+    onForgotPassword: () -> Unit
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -108,6 +109,17 @@ fun LoginScreen(
                     focusedTextColor = TextWhite
                 )
             )
+            
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            TextButton(onClick = onForgotPassword) {
+                Text(
+                    text = "¿Olvidaste tu contraseña?",
+                    color = AccentBlue,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium
+                )
+            }
             
             Spacer(modifier = Modifier.height(24.dp))
             

@@ -13,7 +13,13 @@ import com.example.proyecto01_administracion.ui.theme.AccentBlue
 import com.example.proyecto01_administracion.ui.theme.TextGrayMedium
 
 @Composable
-fun MechanicBottomNavBar(selectedItem: Int = 0) {
+fun MechanicBottomNavBar(
+    selectedItem: Int = 0,
+    onHomeClick: () -> Unit = {},
+    onMaintenanceClick: () -> Unit = {},
+    onAlertsClick: () -> Unit = {},
+    onMoreClick: () -> Unit = {}
+) {
     NavigationBar(
         containerColor = MaterialTheme.colorScheme.background,
         contentColor = TextGrayMedium,
@@ -21,7 +27,7 @@ fun MechanicBottomNavBar(selectedItem: Int = 0) {
     ) {
         NavigationBarItem(
             selected = selectedItem == 0,
-            onClick = { /* TODO */ },
+            onClick = onHomeClick,
             icon = { Icon(Icons.Default.Home, contentDescription = "Inicio") },
             label = { Text("Inicio") },
             colors = NavigationBarItemDefaults.colors(
@@ -34,7 +40,7 @@ fun MechanicBottomNavBar(selectedItem: Int = 0) {
         )
         NavigationBarItem(
             selected = selectedItem == 1,
-            onClick = { /* TODO */ },
+            onClick = onMaintenanceClick,
             icon = { Icon(Icons.Default.Build, contentDescription = "Mantenimiento") },
             label = { Text("Mantenimiento") },
             colors = NavigationBarItemDefaults.colors(
@@ -47,7 +53,7 @@ fun MechanicBottomNavBar(selectedItem: Int = 0) {
         )
         NavigationBarItem(
             selected = selectedItem == 2,
-            onClick = { /* TODO */ },
+            onClick = onAlertsClick,
             icon = { Icon(Icons.Default.Notifications, contentDescription = "Alertas") },
             label = { Text("Alertas") },
             colors = NavigationBarItemDefaults.colors(
@@ -60,7 +66,7 @@ fun MechanicBottomNavBar(selectedItem: Int = 0) {
         )
         NavigationBarItem(
             selected = selectedItem == 3,
-            onClick = { /* TODO */ },
+            onClick = onMoreClick,
             icon = { Icon(Icons.Default.Menu, contentDescription = "Más") },
             label = { Text("Más") },
             colors = NavigationBarItemDefaults.colors(

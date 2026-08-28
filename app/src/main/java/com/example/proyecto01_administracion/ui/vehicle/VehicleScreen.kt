@@ -31,7 +31,8 @@ fun VehicleScreen(
     onNavigateToRegisterMileage: () -> Unit = {},
     onNavigateToMileageHistory: () -> Unit = {},
     onNavigateToDocuments: () -> Unit = {},
-    onNavigateToMaintenanceHistory: () -> Unit = {}
+    onNavigateToMaintenanceHistory: () -> Unit = {},
+    onNavigateToProfile: () -> Unit = {}
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -45,6 +46,10 @@ fun VehicleScreen(
                 onLogout = {
                     scope.launch { drawerState.close() }
                     onLogout()
+                },
+                onProfileClick = {
+                    scope.launch { drawerState.close() }
+                    onNavigateToProfile()
                 }
             )
         }

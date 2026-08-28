@@ -10,12 +10,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.proyecto01_administracion.ui.theme.AccentBlue
 import com.example.proyecto01_administracion.ui.theme.StatusGreen
 import com.example.proyecto01_administracion.ui.theme.StatusYellow
 import kotlinx.coroutines.launch
 
 @Composable
-fun FleetManagerDashboardScreen(onLogout: () -> Unit) {
+fun FleetManagerDashboardScreen(
+    onLogout: () -> Unit,
+    onNavigateToProfile: () -> Unit = {},
+    onNavigateToFleet: () -> Unit = {},
+    onNavigateToUsers: () -> Unit = {},
+    onNavigateToReports: () -> Unit = {},
+    onNavigateToAlerts: () -> Unit = {}
+) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
@@ -28,13 +36,21 @@ fun FleetManagerDashboardScreen(onLogout: () -> Unit) {
                 onLogout = {
                     scope.launch { drawerState.close() }
                     onLogout()
+                },
+                onProfileClick = {
+                    scope.launch { drawerState.close() }
+                    onNavigateToProfile()
                 }
             )
         }
     ) {
         Scaffold(
             bottomBar = {
-                FleetBottomNavBar(selectedItem = 0)
+                FleetBottomNavBar(
+                    selectedItem = 0,
+                    onFleetClick = onNavigateToFleet,
+                    onAlertsClick = onNavigateToAlerts
+                )
             }
         ) { innerPadding ->
             LazyColumn(
@@ -69,14 +85,14 @@ fun FleetManagerDashboardScreen(onLogout: () -> Unit) {
                             label = "Vehículos al día",
                             value = "12",
                             accentColor = StatusGreen,
-                            onClick = { /* Navigate to Fleet */ }
+                            onClick = onNavigateToFleet
                         )
                         StatCard(
                             modifier = Modifier.weight(1f),
                             label = "Próximos vehículos",
                             value = "4",
                             accentColor = StatusYellow,
-                            onClick = { /* Navigate to Fleet Filtered */ }
+                            onClick = onNavigateToFleet
                         )
                     }
                 }
@@ -84,8 +100,36 @@ fun FleetManagerDashboardScreen(onLogout: () -> Unit) {
                 item {
                     Spacer(modifier = Modifier.height(24.dp))
                     AnnouncementsCard(
-                        onViewAlerts = { /* Navigate to Alerts */ }
+                        onViewAlerts = onNavigateToAlerts
                     )
+                }
+
+                item {
+                    SectionHeader(
+                        title = "Acciones Rápidas",
+                        icon = Icons.Default.Build
+                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        StatCard(
+                            modifier = Modifier.weight(1f),
+                            label = "Reportes",
+                            value = "📊",
+                            accentColor = AccentBlue,
+                            onClick = onNavigateToReports
+                        )
+                        StatCard(
+                            modifier = Modifier.weight(1f),
+                            label = "Usuarios",
+                            value = "👥",
+                            accentColor = AccentBlue,
+                            onClick = onNavigateToUsers
+                        )
+                    }
                 }
 
                 item {
@@ -94,7 +138,7 @@ fun FleetManagerDashboardScreen(onLogout: () -> Unit) {
                         icon = Icons.Default.Build
                     )
                     UpcomingMaintenancesFleetCard(
-                        onViewAll = { /* Navigate to Maintenance */ }
+                        onViewAll = onNavigateToFleet
                     )
                 }
             }

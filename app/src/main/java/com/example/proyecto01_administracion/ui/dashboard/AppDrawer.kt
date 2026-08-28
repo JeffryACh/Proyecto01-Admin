@@ -29,7 +29,7 @@ fun AppDrawer(
     userName: String,
     userRole: String,
     onLogout: () -> Unit,
-    onProfileClick: () -> Unit = {},
+    onProfileClick: () -> Unit,
     onSettingsClick: () -> Unit = {}
 ) {
     ModalDrawerSheet(

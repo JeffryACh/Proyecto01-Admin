@@ -19,7 +19,8 @@ fun DashboardScreen(
     onNavigateToVehicle: () -> Unit = {},
     onNavigateToAlerts: () -> Unit = {},
     onNavigateToMaintenanceHistory: () -> Unit = {},
-    onNavigateToMileageHistory: () -> Unit = {}
+    onNavigateToMileageHistory: () -> Unit = {},
+    onNavigateToProfile: () -> Unit = {}
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -33,6 +34,10 @@ fun DashboardScreen(
                 onLogout = {
                     scope.launch { drawerState.close() }
                     onLogout()
+                },
+                onProfileClick = {
+                    scope.launch { drawerState.close() }
+                    onNavigateToProfile()
                 }
             )
         }
