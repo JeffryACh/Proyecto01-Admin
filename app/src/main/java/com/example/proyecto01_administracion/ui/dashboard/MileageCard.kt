@@ -2,8 +2,6 @@ package com.example.proyecto01_administracion.ui.dashboard
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -36,12 +34,12 @@ fun MileageCard(
                 text = "Último registro",
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
-                color = Color.White
+                color = MaterialTheme.colorScheme.onSurface
             )
             Text(
                 text = date,
                 style = MaterialTheme.typography.bodySmall,
-                color = TextGrayLight
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -50,13 +48,13 @@ fun MileageCard(
                 Text(
                     text = "Kilometraje registrado",
                     style = MaterialTheme.typography.labelSmall,
-                    color = TextGrayMedium
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
                     text = mileage,
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.SemiBold,
-                    color = Color.White
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
 
@@ -66,7 +64,6 @@ fun MileageCard(
 
             HistoryLink(
                 text = "Ver historial de kilometraje",
-                icon = Icons.Default.BarChart,
                 onClick = onViewHistory
             )
         }

@@ -39,7 +39,7 @@ fun AnnouncementsCard(
                 text = "Anuncios importantes",
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
-                color = Color.White
+                color = MaterialTheme.colorScheme.onSurface
             )
 
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -78,7 +78,7 @@ private fun AnnouncementItem(text: String, color: Color) {
         Text(
             text = text,
             style = MaterialTheme.typography.bodyMedium,
-            color = TextGrayLight
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }

@@ -1,4 +1,4 @@
-package com.example.proyecto01_administracion.ui.dashboard
+package com.example.proyecto01_administracion.ui.fleet
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -12,10 +12,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.proyecto01_administracion.ui.theme.AccentBlue
-import com.example.proyecto01_administracion.ui.theme.StatusYellow
-import com.example.proyecto01_administracion.ui.theme.TextGrayLight
-import com.example.proyecto01_administracion.ui.theme.TextGrayMedium
+import com.example.proyecto01_administracion.ui.dashboard.HistoryLink
+import com.example.proyecto01_administracion.ui.theme.*
 
 @Composable
 fun UpcomingMaintenancesFleetCard(
@@ -49,22 +47,14 @@ fun UpcomingMaintenancesFleetCard(
                 vehicle = "Volvo FH",
                 plate = "GHI-789",
                 task = "Revisión general",
-                remaining = "1,200 km restantes",
+                remaining = "1.200 km restantes",
                 statusColor = StatusYellow
             )
 
-            TextButton(
-                onClick = onViewAll,
-                modifier = Modifier.align(Alignment.End),
-                contentPadding = PaddingValues(0.dp)
-            ) {
-                Text(
-                    text = "Ver todos →",
-                    color = AccentBlue,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
+            HistoryLink(
+                text = "Ver Mantenimientos",
+                onClick = onViewAll
+            )
         }
     }
 }
@@ -88,18 +78,18 @@ private fun MaintenanceFleetItem(
                     text = vehicle,
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
                     text = plate,
                     style = MaterialTheme.typography.bodySmall,
-                    color = TextGrayMedium
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             Text(
                 text = task,
                 style = MaterialTheme.typography.bodyMedium,
-                color = TextGrayLight
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
         

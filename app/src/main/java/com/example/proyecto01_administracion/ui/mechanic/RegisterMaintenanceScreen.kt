@@ -1,32 +1,20 @@
 package com.example.proyecto01_administracion.ui.mechanic
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.AddAPhoto
-import androidx.compose.material.icons.filled.CalendarToday
-import androidx.compose.material.icons.filled.Category
-import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Numbers
-import androidx.compose.material.icons.filled.Payments
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.proyecto01_administracion.ui.theme.AccentBlue
-import com.example.proyecto01_administracion.ui.theme.BackgroundBlack
-import com.example.proyecto01_administracion.ui.theme.CardGray
-import com.example.proyecto01_administracion.ui.theme.TextGrayLight
-import com.example.proyecto01_administracion.ui.theme.TextWhite
+import androidx.compose.ui.unit.sp
+import com.example.proyecto01_administracion.ui.fleet.FormTextField
+import com.example.proyecto01_administracion.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,148 +23,104 @@ fun RegisterMaintenanceScreen(
     onBack: () -> Unit,
     onSuccess: () -> Unit
 ) {
+    var type by remember { mutableStateOf("Preventivo") }
+    var description by remember { mutableStateOf("") }
+    var cost by remember { mutableStateOf("") }
+    var showConfirmation by remember { mutableStateOf(false) }
+
+    if (showConfirmation) {
+        AlertDialog(
+            onDismissRequest = { },
+            confirmButton = {
+                TextButton(onClick = { 
+                    showConfirmation = false
+                    onSuccess() 
+                }) {
+                    Text("OK", color = AccentBlue)
+                }
+            },
+            title = { Text("Éxito", color = MaterialTheme.colorScheme.onSurface) },
+            text = { Text("Mantenimiento registrado correctamente para el vehículo $plate", color = MaterialTheme.colorScheme.onSurfaceVariant) },
+            containerColor = MaterialTheme.colorScheme.surface
+        )
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Registrar Mantenimiento", color = TextWhite) },
+                title = { Text("Registrar Mantenimiento", color = MaterialTheme.colorScheme.onSurface) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Regresar",
-                            tint = TextWhite
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = BackgroundBlack
+                    containerColor = MaterialTheme.colorScheme.background
                 )
             )
         },
-        containerColor = BackgroundBlack
+        containerColor = MaterialTheme.colorScheme.background,
+        contentWindowInsets = WindowInsets(0.dp)
     ) { innerPadding ->
-        LazyColumn(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp),
-            contentPadding = PaddingValues(top = 16.dp, bottom = 32.dp)
+                .padding(horizontal = 24.dp)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            item {
-                Text(
-                    text = "Vehículo: $plate",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = AccentBlue
-                )
-            }
-            
-            item {
-                MaintenanceInputField(label = "Tipo de Mantenimiento", value = "Preventivo", onValueChange = {}, icon = Icons.Default.Settings)
-            }
-            
-            item {
-                MaintenanceInputField(label = "Categoría", value = "Motor", onValueChange = {}, icon = Icons.Default.Category)
-            }
-            
-            item {
-                MaintenanceInputField(label = "Fecha", value = "28/08/2026", onValueChange = {}, icon = Icons.Default.CalendarToday)
-            }
-            
-            item {
-                MaintenanceInputField(label = "Taller / Mecánico", value = "Taller Central", onValueChange = {}, icon = Icons.Default.LocationOn)
-            }
-            
-            item {
-                MaintenanceInputField(label = "Kilometraje", value = "125,500", onValueChange = {}, icon = Icons.Default.Numbers)
-            }
-            
-            item {
-                MaintenanceInputField(label = "Costo ($)", value = "150.00", onValueChange = {}, icon = Icons.Default.Payments)
-            }
-            
-            item {
-                MaintenanceInputField(
-                    label = "Descripción",
-                    value = "",
-                    onValueChange = {},
-                    icon = Icons.Default.Description,
-                    singleLine = false,
-                    minLines = 3
-                )
-            }
-            
-            item {
-                Text(
-                    text = "Evidencia fotográfica",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = TextGrayLight,
-                    modifier = Modifier.padding(start = 4.dp, bottom = 8.dp)
-                )
-                
-                OutlinedButton(
-                    onClick = { /* TODO */ },
-                    modifier = Modifier.fillMaxWidth().height(100.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = TextGrayLight),
-                    border = ButtonDefaults.outlinedButtonBorder(enabled = true)
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(imageVector = Icons.Default.AddAPhoto, contentDescription = null, modifier = Modifier.size(32.dp))
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text("Subir fotos")
-                    }
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text("Vehículo", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(plate, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                 }
             }
-            
-            item {
-                Spacer(modifier = Modifier.height(12.dp))
-                Button(
-                    onClick = onSuccess,
-                    modifier = Modifier.fillMaxWidth().height(56.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = AccentBlue)
-                ) {
-                    Text("Registrar Mantenimiento", fontWeight = FontWeight.Bold)
-                }
+
+            Text("Tipo de Mantenimiento", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                MaintenanceTypeChip(selected = type == "Preventivo", label = "Preventivo", onClick = { type = "Preventivo" })
+                MaintenanceTypeChip(selected = type == "Correctivo", label = "Correctivo", onClick = { type = "Correctivo" })
+            }
+
+            FormTextField(value = description, onValueChange = { description = it }, label = "Descripción de tareas", placeholder = "Ej: Cambio de aceite y filtros")
+            FormTextField(value = cost, onValueChange = { cost = it }, label = "Costo estimado", placeholder = "0.00")
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            Button(
+                onClick = { showConfirmation = true },
+                modifier = Modifier.fillMaxWidth().height(56.dp).padding(bottom = 16.dp),
+                shape = RoundedCornerShape(16.dp),
+                enabled = description.isNotEmpty()
+            ) {
+                Text("Finalizar Registro", fontWeight = FontWeight.Bold)
             }
         }
     }
 }
 
 @Composable
-fun MaintenanceInputField(
-    label: String,
-    value: String,
-    onValueChange: (String) -> Unit,
-    icon: ImageVector,
-    singleLine: Boolean = true,
-    minLines: Int = 1
-) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelLarge,
-            color = TextGrayLight,
-            modifier = Modifier.padding(start = 4.dp, bottom = 8.dp)
+fun MaintenanceTypeChip(selected: Boolean, label: String, onClick: () -> Unit) {
+    FilterChip(
+        selected = selected,
+        onClick = onClick,
+        label = { Text(label) },
+        colors = FilterChipDefaults.filterChipColors(
+            selectedContainerColor = AccentBlue,
+            selectedLabelColor = Color.White,
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            labelColor = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        OutlinedTextField(
-            value = value,
-            onValueChange = onValueChange,
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-            leadingIcon = { Icon(icon, contentDescription = null, tint = AccentBlue) },
-            singleLine = singleLine,
-            minLines = minLines,
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = CardGray,
-                unfocusedContainerColor = CardGray,
-                focusedBorderColor = AccentBlue,
-                unfocusedBorderColor = Color.Transparent,
-                focusedTextColor = TextWhite,
-                unfocusedTextColor = TextWhite
-            )
-        )
-    }
+    )
 }

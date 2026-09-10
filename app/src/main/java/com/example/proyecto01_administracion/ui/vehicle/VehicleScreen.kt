@@ -8,10 +8,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -21,122 +19,79 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.proyecto01_administracion.ui.dashboard.*
 import com.example.proyecto01_administracion.ui.theme.*
-import kotlinx.coroutines.launch
-
-@Composable
-fun VehicleScreen(
-    onBack: () -> Unit,
-    onLogout: () -> Unit,
-    onNavigateToDashboard: () -> Unit,
-    onNavigateToRegisterMileage: () -> Unit = {},
-    onNavigateToMileageHistory: () -> Unit = {},
-    onNavigateToDocuments: () -> Unit = {},
-    onNavigateToMaintenanceHistory: () -> Unit = {},
-    onNavigateToProfile: () -> Unit = {}
-) {
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val scope = rememberCoroutineScope()
-
-    ModalNavigationDrawer(
-        drawerState = drawerState,
-        drawerContent = {
-            AppDrawer(
-                userName = "Juan Pérez",
-                userRole = "Conductor",
-                onLogout = {
-                    scope.launch { drawerState.close() }
-                    onLogout()
-                },
-                onProfileClick = {
-                    scope.launch { drawerState.close() }
-                    onNavigateToProfile()
-                }
-            )
-        }
-    ) {
-        Scaffold(
-            topBar = {
-                VehicleTopBar(onBack = onBack)
-            },
-            bottomBar = {
-                BottomNavBar(
-                    selectedItem = 1,
-                    onHomeClick = onNavigateToDashboard
-                )
-            },
-            containerColor = BackgroundBlack
-        ) { innerPadding ->
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
-                contentPadding = PaddingValues(24.dp),
-                verticalArrangement = Arrangement.spacedBy(20.dp)
-            ) {
-                item {
-                    VehicleIdentificationSection(
-                        model = "Toyota Hilux",
-                        plate = "ABC-123",
-                        statusLabel = "Vehículo activo"
-                    )
-                }
-
-                item {
-                    VehicleInfoCard()
-                }
-
-                item {
-                    MileageCard(
-                        onRegister = onNavigateToRegisterMileage,
-                        onViewHistory = onNavigateToMileageHistory
-                    )
-                }
-
-                item {
-                    NextMaintenanceCard()
-                }
-
-                item {
-                    DocumentsCard(
-                        onViewDocuments = onNavigateToDocuments
-                    )
-                }
-
-                item {
-                    LastMaintenanceCard(
-                        onViewHistory = onNavigateToMaintenanceHistory
-                    )
-                }
-            }
-        }
-    }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun VehicleTopBar(onBack: () -> Unit) {
-    TopAppBar(
-        title = {
-            Text(
-                text = "Mi Vehículo",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = Color.White
+fun VehicleScreen(
+    onBack: () -> Unit = {},
+    onNavigateToRegisterMileage: () -> Unit = {},
+    onNavigateToMileageHistory: () -> Unit = {},
+    onNavigateToDocuments: () -> Unit = {},
+    onNavigateToMaintenanceHistory: () -> Unit = {}
+) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Mi Vehículo", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Regresar",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
             )
         },
-        navigationIcon = {
-            IconButton(onClick = onBack) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Regresar",
-                    tint = Color.White
+        containerColor = MaterialTheme.colorScheme.background,
+        contentWindowInsets = WindowInsets(0.dp)
+    ) { innerPadding ->
+// ...
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+            contentPadding = PaddingValues(24.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
+        ) {
+            item {
+                VehicleIdentificationSection(
+                    model = "Toyota Hilux",
+                    plate = "ABC-123",
+                    statusLabel = "Vehículo activo"
                 )
             }
-        },
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = BackgroundBlack
-        )
-    )
+
+            item {
+                VehicleInfoCard()
+            }
+
+            item {
+                MileageCard(
+                    onRegister = onNavigateToRegisterMileage,
+                    onViewHistory = onNavigateToMileageHistory
+                )
+            }
+
+            item {
+                NextMaintenanceCard()
+            }
+
+            item {
+                DocumentsCard(
+                    onViewDocuments = onNavigateToDocuments
+                )
+            }
+
+            item {
+                LastMaintenanceCard(
+                    onViewHistory = onNavigateToMaintenanceHistory
+                )
+            }
+        }
+    }
 }
 
 @Composable
@@ -145,25 +100,19 @@ fun VehicleIdentificationSection(
     plate: String,
     statusLabel: String
 ) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = model,
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-            color = Color.White
-        )
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        VehicleSummary(model = model, plate = plate)
+        
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = StatusGreen.copy(alpha = 0.1f)
         ) {
-            Text(
-                text = plate,
-                style = MaterialTheme.typography.bodyLarge,
-                color = TextGrayLight
-            )
             Row(
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
@@ -213,12 +162,12 @@ fun MileageCard(
                         text = "125,430 km",
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
                         text = "Último registro: 25 Ago 2026",
                         style = MaterialTheme.typography.bodySmall,
-                        color = TextGrayLight
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -236,7 +185,6 @@ fun MileageCard(
             
             HistoryLink(
                 text = "Ver historial",
-                icon = Icons.Default.ChevronRight,
                 onClick = onViewHistory
             )
         }
@@ -255,7 +203,7 @@ fun NextMaintenanceCard() {
                     text = "🔧 Cambio de aceite",
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
                     text = "450 km restantes",
@@ -267,7 +215,7 @@ fun NextMaintenanceCard() {
             Text(
                 text = "Fecha estimada: 15 Sep 2026",
                 style = MaterialTheme.typography.bodySmall,
-                color = TextGrayLight
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             
             // Progress Bar
@@ -275,7 +223,7 @@ fun NextMaintenanceCard() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(8.dp)
-                    .background(CardBorderGray, RoundedCornerShape(4.dp))
+                    .background(MaterialTheme.colorScheme.outline, RoundedCornerShape(4.dp))
             ) {
                 Box(
                     modifier = Modifier
@@ -305,7 +253,6 @@ fun DocumentsCard(
             
             HistoryLink(
                 text = "Ver documentos",
-                icon = Icons.Default.ChevronRight,
                 onClick = onViewDocuments
             )
         }
@@ -322,7 +269,7 @@ fun LastMaintenanceCard(
                 text = "Cambio de aceite",
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Bold,
-                color = Color.White
+                color = MaterialTheme.colorScheme.onSurface
             )
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -331,25 +278,24 @@ fun LastMaintenanceCard(
                 Text(
                     text = "120,000 km",
                     style = MaterialTheme.typography.bodySmall,
-                    color = TextGrayLight
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
                     text = "10 Ago 2026",
                     style = MaterialTheme.typography.bodySmall,
-                    color = TextGrayLight
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             Text(
                 text = "Mecánico: Juan Pérez",
                 style = MaterialTheme.typography.bodySmall,
-                color = TextGrayMedium
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             
             Spacer(modifier = Modifier.height(8.dp))
             
             HistoryLink(
                 text = "Ver historial",
-                icon = Icons.Default.ChevronRight,
                 onClick = onViewHistory
             )
         }
@@ -364,7 +310,7 @@ fun BaseVehicleCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = CardGray),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
         border = CardDefaults.outlinedCardBorder()
     ) {
         Column(
@@ -375,7 +321,7 @@ fun BaseVehicleCard(
                 text = title,
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
-                color = TextGrayMedium
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             content()
         }
@@ -388,8 +334,8 @@ fun InfoRow(label: String, value: String) {
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(text = label, color = TextGrayLight, fontSize = 14.sp)
-        Text(text = value, color = Color.White, fontWeight = FontWeight.Medium, fontSize = 14.sp)
+        Text(text = label, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
+        Text(text = value, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Medium, fontSize = 14.sp)
     }
 }
 
@@ -400,7 +346,7 @@ fun DocumentRow(label: String, status: String, color: Color) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = label, color = TextWhite, fontSize = 14.sp)
+        Text(text = label, color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp)
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp)

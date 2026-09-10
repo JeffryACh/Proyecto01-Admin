@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.*
@@ -15,11 +16,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.proyecto01_administracion.ui.theme.StatusGreen
-import com.example.proyecto01_administracion.ui.theme.StatusRed
-import com.example.proyecto01_administracion.ui.theme.StatusYellow
-import com.example.proyecto01_administracion.ui.theme.TextGrayLight
-import com.example.proyecto01_administracion.ui.theme.AccentBlue
+import com.example.proyecto01_administracion.ui.theme.*
 
 enum class VehicleStatus(val label: String, val color: Color) {
     ON_TRACK("Al día", StatusGreen),
@@ -40,7 +37,7 @@ fun StatusIndicator(status: VehicleStatus) {
         )
         Text(
             text = status.label,
-            color = Color.White,
+            color = MaterialTheme.colorScheme.onSurface,
             fontWeight = FontWeight.Bold,
             fontSize = 14.sp
         )
@@ -66,7 +63,7 @@ fun SectionHeader(title: String, icon: ImageVector) {
             text = title,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
-            color = Color.White
+            color = MaterialTheme.colorScheme.onSurface
         )
     }
 }
@@ -74,39 +71,49 @@ fun SectionHeader(title: String, icon: ImageVector) {
 @Composable
 fun HistoryLink(
     text: String,
-    icon: ImageVector,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
             .padding(vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = AccentBlue,
-                modifier = Modifier.size(20.dp)
-            )
-            Text(
-                text = text,
-                color = AccentBlue,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium
-            )
-        }
+        Text(
+            text = text,
+            color = AccentBlue,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Medium
+        )
         Icon(
             imageVector = Icons.Default.ChevronRight,
             contentDescription = null,
             tint = AccentBlue,
             modifier = Modifier.size(20.dp)
+        )
+    }
+}
+
+@Composable
+fun VehicleSummary(
+    model: String,
+    plate: String,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier) {
+        Text(
+            text = model,
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Text(
+            text = plate,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
@@ -122,7 +129,7 @@ fun StatCard(
     Card(
         modifier = modifier
             .clickable(onClick = onClick),
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
@@ -143,12 +150,12 @@ fun StatCard(
                 text = value,
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
-                color = Color.White
+                color = MaterialTheme.colorScheme.onSurface
             )
             Text(
                 text = label,
                 style = MaterialTheme.typography.bodySmall,
-                color = TextGrayLight,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 lineHeight = 16.sp
             )
         }

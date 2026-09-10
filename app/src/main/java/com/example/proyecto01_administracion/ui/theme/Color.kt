@@ -20,6 +20,16 @@ val TextWhite = Color(0xFFFFFFFF)
 val TextGrayLight = Color(0xFFB0B0B0)
 val TextGrayMedium = Color(0xFF808080)
 
+// TransAndina Light Theme Palette
+val BackgroundWhite = Color(0xFFF8F9FA)
+val SurfaceWhite = Color(0xFFFFFFFF)
+val SurfaceGrayLight = Color(0xFFF1F3F5)
+val BorderGrayLight = Color(0xFFDEE2E6)
+
+val TextBlack = Color(0xFF1A1A1A)
+val TextGrayDark = Color(0xFF495057)
+val TextGrayMuted = Color(0xFF868E96)
+
 val AccentBlue = Color(0xFF2196F3)
 val AccentBluePurple = Color(0xFF3F51B5)
 val AccentPurple = Color(0xFF9C27B0)

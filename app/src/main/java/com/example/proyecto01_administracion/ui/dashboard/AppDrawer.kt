@@ -1,11 +1,13 @@
 package com.example.proyecto01_administracion.ui.dashboard
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
@@ -30,10 +32,11 @@ fun AppDrawer(
     userRole: String,
     onLogout: () -> Unit,
     onProfileClick: () -> Unit,
-    onSettingsClick: () -> Unit = {}
+    onSettingsClick: () -> Unit = {},
+    onUsersManagementClick: (() -> Unit)? = null
 ) {
     ModalDrawerSheet(
-        drawerContainerColor = BackgroundBlack,
+        drawerContainerColor = MaterialTheme.colorScheme.background,
         drawerShape = RoundedCornerShape(topEnd = 24.dp, bottomEnd = 24.dp),
         modifier = Modifier.fillMaxHeight().fillMaxWidth(0.8f)
     ) {
@@ -42,11 +45,15 @@ fun AppDrawer(
                 .fillMaxSize()
                 .padding(24.dp)
         ) {
-            // Drawer Header
+            // Drawer Header - Entirely Clickable
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier.padding(vertical = 24.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .clickable(onClick = onProfileClick)
+                    .padding(vertical = 24.dp, horizontal = 8.dp)
             ) {
                 Box(
                     modifier = Modifier
@@ -67,17 +74,17 @@ fun AppDrawer(
                         text = userName,
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
-                        color = TextWhite
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
                         text = userRole,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = TextGrayLight
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
             
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             
             // Drawer Items
             DrawerItem(
@@ -85,6 +92,15 @@ fun AppDrawer(
                 icon = Icons.Default.Person,
                 onClick = onProfileClick
             )
+
+            if (onUsersManagementClick != null) {
+                DrawerItem(
+                    label = "Gestión de Usuarios",
+                    icon = Icons.Default.Group,
+                    onClick = onUsersManagementClick
+                )
+            }
+
             DrawerItem(
                 label = "Configuración",
                 icon = Icons.Default.Settings,
@@ -125,8 +141,8 @@ private fun DrawerItem(
         icon = { Icon(icon, contentDescription = null) },
         colors = NavigationDrawerItemDefaults.colors(
             unselectedContainerColor = Color.Transparent,
-            unselectedIconColor = TextGrayLight,
-            unselectedTextColor = TextWhite
+            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            unselectedTextColor = MaterialTheme.colorScheme.onSurface
         ),
         modifier = Modifier.padding(vertical = 4.dp)
     )

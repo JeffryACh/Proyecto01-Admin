@@ -1,24 +1,25 @@
 package com.example.proyecto01_administracion.ui.profile
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.proyecto01_administracion.ui.fleet.FormTextField
 import com.example.proyecto01_administracion.ui.theme.AccentBlue
-import com.example.proyecto01_administracion.ui.theme.BackgroundBlack
-import com.example.proyecto01_administracion.ui.theme.CardGray
-import com.example.proyecto01_administracion.ui.theme.TextGrayLight
-import com.example.proyecto01_administracion.ui.theme.TextWhite
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -26,99 +27,88 @@ fun EditProfileScreen(
     onBack: () -> Unit,
     onSave: () -> Unit
 ) {
+    var name by remember { mutableStateOf("Juan Pérez") }
+    var email by remember { mutableStateOf("juan.perez@transandina.com") }
+    var phone by remember { mutableStateOf("+506 8888-8888") }
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Editar Perfil", color = TextWhite) },
+                title = { Text("Editar Perfil", color = MaterialTheme.colorScheme.onSurface) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Regresar",
-                            tint = TextWhite
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = BackgroundBlack
+                    containerColor = MaterialTheme.colorScheme.background
                 )
             )
         },
-        containerColor = BackgroundBlack
+        containerColor = MaterialTheme.colorScheme.background,
+        contentWindowInsets = WindowInsets(0.dp)
     ) { innerPadding ->
-        LazyColumn(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = 24.dp),
+                .padding(horizontal = 24.dp)
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
-            contentPadding = PaddingValues(bottom = 24.dp)
+            verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            item {
-                Spacer(modifier = Modifier.height(24.dp))
-                
-                // Form Fields
-                EditField(
-                    label = "Nombre completo",
-                    value = "Juan Pérez",
-                    onValueChange = {},
-                    icon = Icons.Default.Person
-                )
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                EditField(
-                    label = "Teléfono",
-                    value = "+506 8888-8888",
-                    onValueChange = {},
-                    icon = Icons.Default.Phone
-                )
-                
-                Spacer(modifier = Modifier.height(32.dp))
-                
-                Button(
-                    onClick = onSave,
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            // Avatar with Edit Icon
+            Box(contentAlignment = Alignment.BottomEnd) {
+                Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = AccentBlue)
+                        .size(100.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Text("Guardar Cambios", fontWeight = FontWeight.Bold)
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = null,
+                        modifier = Modifier.size(60.dp),
+                        tint = AccentBlue
+                    )
+                }
+                Surface(
+                    shape = CircleShape,
+                    color = AccentBlue,
+                    modifier = Modifier.size(32.dp),
+                    shadowElevation = 4.dp
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.CameraAlt,
+                        contentDescription = "Cambiar foto",
+                        tint = Color.White,
+                        modifier = Modifier.padding(6.dp)
+                    )
                 }
             }
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            FormTextField(value = name, onValueChange = { name = it }, label = "Nombre completo")
+            FormTextField(value = email, onValueChange = { email = it }, label = "Correo electrónico")
+            FormTextField(value = phone, onValueChange = { phone = it }, label = "Teléfono")
+            
+            Spacer(modifier = Modifier.weight(1f))
+            
+            Button(
+                onClick = onSave,
+                modifier = Modifier.fillMaxWidth().height(56.dp).padding(bottom = 16.dp),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Text("Guardar Cambios", fontWeight = FontWeight.Bold)
+            }
         }
-    }
-}
-
-@Composable
-fun EditField(
-    label: String,
-    value: String,
-    onValueChange: (String) -> Unit,
-    icon: androidx.compose.ui.graphics.vector.ImageVector
-) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelLarge,
-            color = TextGrayLight,
-            modifier = Modifier.padding(start = 4.dp, bottom = 8.dp)
-        )
-        OutlinedTextField(
-            value = value,
-            onValueChange = onValueChange,
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-            leadingIcon = { Icon(icon, contentDescription = null, tint = AccentBlue) },
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = CardGray,
-                unfocusedContainerColor = CardGray,
-                focusedBorderColor = AccentBlue,
-                unfocusedBorderColor = Color.Transparent,
-                focusedTextColor = TextWhite,
-                unfocusedTextColor = TextWhite
-            )
-        )
     }
 }

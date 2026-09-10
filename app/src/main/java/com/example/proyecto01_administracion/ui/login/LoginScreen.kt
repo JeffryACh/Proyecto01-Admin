@@ -24,10 +24,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.proyecto01_administracion.ui.theme.AccentBlue
 import com.example.proyecto01_administracion.ui.theme.AccentPurple
-import com.example.proyecto01_administracion.ui.theme.BackgroundBlack
-import com.example.proyecto01_administracion.ui.theme.CardGray
-import com.example.proyecto01_administracion.ui.theme.TextGrayLight
-import com.example.proyecto01_administracion.ui.theme.TextWhite
 
 @Composable
 fun LoginScreen(
@@ -38,7 +34,7 @@ fun LoginScreen(
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = BackgroundBlack
+        color = MaterialTheme.colorScheme.background
     ) {
         Column(
             modifier = Modifier
@@ -62,13 +58,13 @@ fun LoginScreen(
                 text = "TransAndina",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
-                color = TextWhite
+                color = MaterialTheme.colorScheme.onSurface
             )
             
             Text(
                 text = "Gestión de mantenimiento de flotilla",
                 style = MaterialTheme.typography.bodyMedium,
-                color = TextGrayLight
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             
             Spacer(modifier = Modifier.height(48.dp))
@@ -77,16 +73,17 @@ fun LoginScreen(
             OutlinedTextField(
                 value = "",
                 onValueChange = {},
-                placeholder = { Text("Correo electrónico", color = TextGrayLight) },
+                placeholder = { Text("Correo electrónico", color = MaterialTheme.colorScheme.onSurfaceVariant) },
                 leadingIcon = { Icon(Icons.Default.Email, contentDescription = null, tint = AccentBlue) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = CardGray,
-                    unfocusedContainerColor = CardGray,
+                    focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                     focusedBorderColor = AccentBlue,
                     unfocusedBorderColor = Color.Transparent,
-                    focusedTextColor = TextWhite
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface
                 )
             )
             
@@ -96,17 +93,18 @@ fun LoginScreen(
             OutlinedTextField(
                 value = "",
                 onValueChange = {},
-                placeholder = { Text("Contraseña", color = TextGrayLight) },
+                placeholder = { Text("Contraseña", color = MaterialTheme.colorScheme.onSurfaceVariant) },
                 leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = AccentBlue) },
                 visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = CardGray,
-                    unfocusedContainerColor = CardGray,
+                    focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                     focusedBorderColor = AccentBlue,
                     unfocusedBorderColor = Color.Transparent,
-                    focusedTextColor = TextWhite
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface
                 )
             )
             
@@ -140,7 +138,7 @@ fun LoginScreen(
             Text(
                 text = "Acceso de prueba",
                 style = MaterialTheme.typography.labelLarge,
-                color = TextGrayLight,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontWeight = FontWeight.SemiBold
             )
             
@@ -178,7 +176,7 @@ private fun TestAccessButton(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = ButtonDefaults.outlinedButtonColors(
-            contentColor = TextWhite
+            contentColor = MaterialTheme.colorScheme.onSurface
         ),
         border = ButtonDefaults.outlinedButtonBorder.copy(
             brush = Brush.horizontalGradient(listOf(AccentBlue, AccentPurple))

@@ -79,13 +79,13 @@ private fun QuickActionButton(
                     text = title,
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 if (subtitle != null) {
                     Text(
                         text = subtitle,
                         style = MaterialTheme.typography.labelSmall,
-                        color = TextGrayLight
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }

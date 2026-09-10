@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.proyecto01_administracion.ui.theme.AccentBlue
+import com.example.proyecto01_administracion.ui.theme.BackgroundBlack
 import com.example.proyecto01_administracion.ui.theme.TextGrayMedium
 
 @Composable
@@ -22,8 +23,8 @@ fun MechanicBottomNavBar(
 ) {
     NavigationBar(
         containerColor = MaterialTheme.colorScheme.background,
-        contentColor = TextGrayMedium,
-        tonalElevation = 8.dp
+        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        tonalElevation = 0.dp
     ) {
         NavigationBarItem(
             selected = selectedItem == 0,
@@ -33,8 +34,8 @@ fun MechanicBottomNavBar(
             colors = NavigationBarItemDefaults.colors(
                 selectedIconColor = AccentBlue,
                 selectedTextColor = AccentBlue,
-                unselectedIconColor = TextGrayMedium,
-                unselectedTextColor = TextGrayMedium,
+                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 indicatorColor = Color.Transparent
             )
         )
@@ -46,8 +47,8 @@ fun MechanicBottomNavBar(
             colors = NavigationBarItemDefaults.colors(
                 selectedIconColor = AccentBlue,
                 selectedTextColor = AccentBlue,
-                unselectedIconColor = TextGrayMedium,
-                unselectedTextColor = TextGrayMedium,
+                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 indicatorColor = Color.Transparent
             )
         )
@@ -59,8 +60,8 @@ fun MechanicBottomNavBar(
             colors = NavigationBarItemDefaults.colors(
                 selectedIconColor = AccentBlue,
                 selectedTextColor = AccentBlue,
-                unselectedIconColor = TextGrayMedium,
-                unselectedTextColor = TextGrayMedium,
+                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 indicatorColor = Color.Transparent
             )
         )
@@ -72,8 +73,8 @@ fun MechanicBottomNavBar(
             colors = NavigationBarItemDefaults.colors(
                 selectedIconColor = AccentBlue,
                 selectedTextColor = AccentBlue,
-                unselectedIconColor = TextGrayMedium,
-                unselectedTextColor = TextGrayMedium,
+                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 indicatorColor = Color.Transparent
             )
         )

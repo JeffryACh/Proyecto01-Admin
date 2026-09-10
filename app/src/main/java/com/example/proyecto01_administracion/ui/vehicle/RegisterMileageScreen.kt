@@ -1,6 +1,5 @@
 package com.example.proyecto01_administracion.ui.vehicle
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -9,13 +8,13 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.proyecto01_administracion.ui.dashboard.VehicleSummary
 import com.example.proyecto01_administracion.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -25,7 +24,7 @@ fun RegisterMileageScreen(
     onSuccess: () -> Unit = {}
 ) {
     var mileage by remember { mutableStateOf("") }
-    var date by remember { mutableStateOf("27 Ago 2026") }
+    var date by remember { mutableStateOf("") } 
     var showConfirmation by remember { mutableStateOf(false) }
     
     val lastMileage = 125430
@@ -42,25 +41,30 @@ fun RegisterMileageScreen(
                     Text("OK", color = AccentBlue)
                 }
             },
-            title = { Text("Éxito", color = Color.White) },
-            text = { Text("Kilometraje registrado correctamente", color = TextGrayLight) },
-            containerColor = CardGray
+            title = { Text("Éxito", color = MaterialTheme.colorScheme.onSurface) },
+            text = { Text("Kilometraje registrado correctamente", color = MaterialTheme.colorScheme.onSurfaceVariant) },
+            containerColor = MaterialTheme.colorScheme.surface
         )
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Registrar kilometraje", fontWeight = FontWeight.Bold, color = Color.White) },
+                title = { Text("Registrar kilometraje", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Regresar", tint = Color.White)
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Regresar",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = BackgroundBlack)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
             )
         },
-        containerColor = BackgroundBlack
+        containerColor = MaterialTheme.colorScheme.background,
+        contentWindowInsets = WindowInsets(0.dp)
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -69,21 +73,22 @@ fun RegisterMileageScreen(
                 .padding(horizontal = 24.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
+            Spacer(modifier = Modifier.height(8.dp))
+            
             // Vehicle Info Card
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = CardGray),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
                 border = CardDefaults.outlinedCardBorder()
             ) {
                 Column(modifier = Modifier.padding(20.dp)) {
-                    Text("Toyota Hilux", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = TextWhite)
-                    Text("ABC-123", style = MaterialTheme.typography.bodyMedium, color = TextGrayLight)
+                    VehicleSummary(model = "Toyota Hilux", plate = "ABC-123")
                     
                     Spacer(modifier = Modifier.height(16.dp))
                     
-                    Text("Último kilometraje registrado", style = MaterialTheme.typography.labelSmall, color = TextGrayMedium)
-                    Text("${lastMileage} km", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = AccentBlue)
+                    Text("Kilometraje actual registrado", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("125,430 km", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = AccentBlue)
                 }
             }
 
@@ -92,19 +97,20 @@ fun RegisterMileageScreen(
                 value = date,
                 onValueChange = { date = it },
                 label = { Text("Fecha") },
+                placeholder = { Text("27 Ago 2026", color = MaterialTheme.colorScheme.onSurfaceVariant) },
                 modifier = Modifier.fillMaxWidth(),
                 readOnly = true,
                 trailingIcon = { Icon(Icons.Default.CalendarToday, contentDescription = null, tint = AccentBlue) },
                 shape = RoundedCornerShape(16.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = CardGray,
-                    unfocusedContainerColor = CardGray,
+                    focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                     focusedBorderColor = AccentBlue,
-                    unfocusedBorderColor = CardBorderGray,
-                    focusedTextColor = TextWhite,
-                    unfocusedTextColor = TextWhite,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
                     focusedLabelColor = AccentBlue,
-                    unfocusedLabelColor = TextGrayLight
+                    unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             )
 
@@ -114,27 +120,27 @@ fun RegisterMileageScreen(
                     value = mileage,
                     onValueChange = { mileage = it },
                     label = { Text("Kilometraje actual") },
-                    placeholder = { Text("Ingrese el kilometraje", color = TextGrayMedium) },
-                    suffix = { Text("km", color = TextWhite) },
+                    placeholder = { Text("Ingrese el kilometraje (ej. 126,250)", color = MaterialTheme.colorScheme.onSurfaceVariant) },
+                    suffix = { Text("km", color = MaterialTheme.colorScheme.onSurface) },
                     modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     shape = RoundedCornerShape(16.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = CardGray,
-                        unfocusedContainerColor = CardGray,
+                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                         focusedBorderColor = if (mileage.isNotEmpty() && !isMileageValid) StatusRed else AccentBlue,
-                        unfocusedBorderColor = if (mileage.isNotEmpty() && !isMileageValid) StatusRed else CardBorderGray,
-                        focusedTextColor = TextWhite,
-                        unfocusedTextColor = TextWhite,
+                        unfocusedBorderColor = if (mileage.isNotEmpty() && !isMileageValid) StatusRed else MaterialTheme.colorScheme.outline,
+                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
                         focusedLabelColor = if (mileage.isNotEmpty() && !isMileageValid) StatusRed else AccentBlue,
-                        unfocusedLabelColor = TextGrayLight
+                        unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 )
                 
                 Text(
-                    text = "Último kilometraje registrado: ${lastMileage} km",
+                    text = "Último kilometraje registrado: 125,430 km",
                     style = MaterialTheme.typography.labelSmall,
-                    color = TextGrayMedium
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 
                 if (mileage.isNotEmpty() && !isMileageValid) {
@@ -158,7 +164,7 @@ fun RegisterMileageScreen(
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = AccentBlue,
-                    disabledContainerColor = CardGray
+                    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant
                 )
             ) {
                 Text("Registrar kilometraje", fontWeight = FontWeight.Bold, fontSize = 16.sp)

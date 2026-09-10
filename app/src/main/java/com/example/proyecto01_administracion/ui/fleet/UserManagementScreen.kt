@@ -20,13 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.proyecto01_administracion.ui.theme.AccentBlue
-import com.example.proyecto01_administracion.ui.theme.BackgroundBlack
-import com.example.proyecto01_administracion.ui.theme.CardGray
-import com.example.proyecto01_administracion.ui.theme.StatusGreen
-import com.example.proyecto01_administracion.ui.theme.StatusYellow
-import com.example.proyecto01_administracion.ui.theme.TextGrayLight
-import com.example.proyecto01_administracion.ui.theme.TextWhite
+import com.example.proyecto01_administracion.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,41 +32,31 @@ fun UserManagementScreen(
     var searchQuery by remember { mutableStateOf("") }
 
     val users = listOf(
-        UserItem("1-2345-6789", "Juan Pérez", "Conductor", "Activo", StatusGreen),
-        UserItem("2-3456-7890", "Ricardo Alfaro", "Mecánico", "Activo", StatusGreen),
-        UserItem("3-4567-8901", "Carlos Rodríguez", "Encargado", "Activo", StatusGreen),
-        UserItem("4-5678-9012", "Ana Martínez", "Conductor", "Inactivo", StatusYellow)
+        UserItem("1-2345-6789", "Juan Pérez", "Conductor", "juan.perez@example.com", "Toyota Hilux · ABC-123", "Activo", StatusGreen),
+        UserItem("2-3456-7890", "María López", "Mecánico", "maria.lopez@example.com", null, "Activo", StatusGreen),
+        UserItem("3-4567-8901", "Carlos Rodríguez", "Encargado", "carlos.r@example.com", null, "Activo", StatusGreen)
     )
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Gestión de Usuarios", color = TextWhite) },
+                title = { Text("Gestión de Usuarios", color = MaterialTheme.colorScheme.onSurface) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Regresar",
-                            tint = TextWhite
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = BackgroundBlack
+                    containerColor = MaterialTheme.colorScheme.background
                 )
             )
         },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = onNavigateToCreateUser,
-                containerColor = AccentBlue,
-                contentColor = TextWhite,
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = "Registrar usuario")
-            }
-        },
-        containerColor = BackgroundBlack
+        containerColor = MaterialTheme.colorScheme.background,
+        contentWindowInsets = WindowInsets(0.dp)
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -80,39 +64,72 @@ fun UserManagementScreen(
                 .padding(innerPadding)
                 .padding(horizontal = 24.dp)
         ) {
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
             
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("Usuarios", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                Text("Activos: 8 · Suspendidos: 1", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
-                placeholder = { Text("Buscar usuario...", color = TextGrayLight) },
+                placeholder = { Text("Buscar usuario", color = MaterialTheme.colorScheme.onSurfaceVariant) },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = AccentBlue) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = CardGray,
-                    unfocusedContainerColor = CardGray,
+                    focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                     focusedBorderColor = AccentBlue,
                     unfocusedBorderColor = Color.Transparent,
-                    focusedTextColor = TextWhite
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface
                 )
             )
-            
+
             Spacer(modifier = Modifier.height(24.dp))
-            
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                contentPadding = PaddingValues(bottom = 80.dp)
-            ) {
-                items(users.filter { it.name.contains(searchQuery, true) || it.id.contains(searchQuery, true) }) { user ->
-                    UserCard(user = user, onClick = { onNavigateToUserDetail(user.id) })
+
+            Box(modifier = Modifier.weight(1f)) {
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    contentPadding = PaddingValues(bottom = 80.dp)
+                ) {
+                    items(users) { user ->
+                        UserCard(user = user, onClick = { onNavigateToUserDetail(user.id) })
+                    }
+                }
+                
+                FloatingActionButton(
+                    onClick = onNavigateToCreateUser,
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(bottom = 16.dp),
+                    containerColor = AccentBlue,
+                    contentColor = Color.White
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "Crear usuario")
                 }
             }
         }
     }
 }
 
-data class UserItem(val id: String, val name: String, val role: String, val status: String, val statusColor: Color)
+data class UserItem(
+    val id: String,
+    val name: String,
+    val role: String,
+    val email: String,
+    val assignedVehicle: String?,
+    val status: String,
+    val statusColor: Color
+)
 
 @Composable
 fun UserCard(user: UserItem, onClick: () -> Unit) {
@@ -121,30 +138,27 @@ fun UserCard(user: UserItem, onClick: () -> Unit) {
             .fillMaxWidth()
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = CardGray),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
         border = CardDefaults.outlinedCardBorder()
     ) {
         Row(
-            modifier = Modifier
-                .padding(20.dp)
-                .fillMaxWidth(),
+            modifier = Modifier.padding(20.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                Box(modifier = Modifier.size(48.dp).background(BackgroundBlack, CircleShape), contentAlignment = Alignment.Center) {
-                    Icon(Icons.Default.Person, contentDescription = null, tint = AccentBlue)
-                }
-                Column {
-                    Text(text = user.name, fontWeight = FontWeight.Bold, color = TextWhite, fontSize = 16.sp)
-                    Text(text = user.role, color = TextGrayLight, fontSize = 14.sp)
+            Box(modifier = Modifier.size(48.dp).background(MaterialTheme.colorScheme.background, CircleShape), contentAlignment = Alignment.Center) {
+                Icon(Icons.Default.Person, contentDescription = null, tint = AccentBlue)
+            }
+            Column(modifier = Modifier.weight(1f)) {
+                Text(text = user.name, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                Text(text = user.role, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(text = user.email, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                if (user.assignedVehicle != null) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(text = user.assignedVehicle, style = MaterialTheme.typography.labelSmall, color = AccentBlue, fontWeight = FontWeight.Medium)
                 }
             }
-            
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Box(modifier = Modifier.size(8.dp).background(user.statusColor, CircleShape))
-                Text(text = user.status, color = user.statusColor, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-            }
+            Box(modifier = Modifier.size(8.dp).background(user.statusColor, CircleShape))
         }
     }
 }

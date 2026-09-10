@@ -1,25 +1,18 @@
 package com.example.proyecto01_administracion.ui.fleet
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Badge
-import androidx.compose.material.icons.filled.CalendarToday
-import androidx.compose.material.icons.filled.DirectionsCar
-import androidx.compose.material.icons.filled.Numbers
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.proyecto01_administracion.ui.profile.EditField
-import com.example.proyecto01_administracion.ui.theme.AccentBlue
-import com.example.proyecto01_administracion.ui.theme.BackgroundBlack
-import com.example.proyecto01_administracion.ui.theme.TextWhite
+import com.example.proyecto01_administracion.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -29,64 +22,69 @@ fun VehicleFormScreen(
     onSave: () -> Unit
 ) {
     val isEdit = plate != null
-    
+    var model by remember { mutableStateOf("") }
+    var year by remember { mutableStateOf("") }
+    var mileage by remember { mutableStateOf("") }
+    var vin by remember { mutableStateOf("") }
+    var type by remember { mutableStateOf("Liviano") }
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (isEdit) "Editar Vehículo" else "Registrar Vehículo", color = TextWhite) },
+                title = { Text(if (isEdit) "Editar Vehículo" else "Registrar Vehículo", color = MaterialTheme.colorScheme.onSurface) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Regresar",
-                            tint = TextWhite
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = BackgroundBlack
+                    containerColor = MaterialTheme.colorScheme.background
                 )
             )
         },
-        containerColor = BackgroundBlack
+        containerColor = MaterialTheme.colorScheme.background,
+        contentWindowInsets = WindowInsets(0.dp)
     ) { innerPadding ->
-        LazyColumn(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp),
-            contentPadding = PaddingValues(top = 16.dp, bottom = 32.dp)
+                .padding(horizontal = 24.dp)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            item {
-                EditField(label = "Placa", value = plate ?: "", onValueChange = {}, icon = Icons.Default.Badge)
-            }
-            item {
-                EditField(label = "Marca", value = "Toyota", onValueChange = {}, icon = Icons.Default.Settings)
-            }
-            item {
-                EditField(label = "Modelo", value = "Hilux", onValueChange = {}, icon = Icons.Default.DirectionsCar)
-            }
-            item {
-                EditField(label = "Año", value = "2022", onValueChange = {}, icon = Icons.Default.CalendarToday)
-            }
-            item {
-                EditField(label = "Kilometraje Inicial", value = "0", onValueChange = {}, icon = Icons.Default.Numbers)
-            }
-            item {
-                EditField(label = "Conductor Asignado", value = "Juan Pérez", onValueChange = {}, icon = Icons.Default.Person)
-            }
+            Spacer(modifier = Modifier.height(8.dp))
+
+            FormTextField(value = model, onValueChange = { model = it }, label = "Marca y Modelo", placeholder = "Toyota Hilux")
+            FormTextField(value = plate ?: "", onValueChange = { }, label = "Placa", enabled = !isEdit, placeholder = "ABC-123")
+            FormTextField(value = year, onValueChange = { year = it }, label = "Año", placeholder = "2022")
+            FormTextField(value = vin, onValueChange = { vin = it }, label = "VIN / Chasis", placeholder = "1A2B3C4D5E6F7G8H9")
             
-            item {
-                Spacer(modifier = Modifier.height(12.dp))
-                Button(
-                    onClick = onSave,
-                    modifier = Modifier.fillMaxWidth().height(56.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = AccentBlue)
-                ) {
-                    Text(if (isEdit) "Guardar Cambios" else "Registrar Vehículo", fontWeight = FontWeight.Bold)
-                }
+            Text("Tipo de Vehículo", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                RoleChip(selected = type == "Liviano", label = "Liviano", onClick = { type = "Liviano" })
+                RoleChip(selected = type == "Pesado", label = "Pesado", onClick = { type = "Pesado" })
+            }
+
+            if (!isEdit) {
+                FormTextField(value = mileage, onValueChange = { mileage = it }, label = "Kilometraje Inicial", placeholder = "0")
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Button(
+                onClick = onSave,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+                    .padding(bottom = 16.dp),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Text(if (isEdit) "Guardar Cambios" else "Registrar Vehículo", fontWeight = FontWeight.Bold)
             }
         }
     }

@@ -24,11 +24,13 @@ fun DashboardHeader(
     userName: String,
     userRole: String,
     hasNotifications: Boolean = false,
-    onAvatarClick: () -> Unit = {}
+    onAvatarClick: () -> Unit = {},
+    onNotificationClick: () -> Unit = {}
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.background)
             .padding(horizontal = 24.dp, vertical = 20.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
@@ -52,7 +54,7 @@ fun DashboardHeader(
                 Icon(
                     imageVector = Icons.Default.Person,
                     contentDescription = null,
-                    tint = TextGrayLight,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -63,23 +65,23 @@ fun DashboardHeader(
                     text = userName,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
                     text = userRole,
                     style = MaterialTheme.typography.bodySmall,
-                    color = TextGrayLight
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
 
         // Notification Icon
         Box {
-            IconButton(onClick = { /* TODO */ }) {
+            IconButton(onClick = onNotificationClick) {
                 Icon(
                     imageVector = Icons.Default.Notifications,
                     contentDescription = "Notificaciones",
-                    tint = Color.White
+                    tint = MaterialTheme.colorScheme.onSurface
                 )
             }
             if (hasNotifications) {

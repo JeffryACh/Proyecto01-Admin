@@ -38,22 +38,23 @@ fun ProfileScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Mi Perfil", color = TextWhite) },
+                title = { Text("Mi Perfil", color = MaterialTheme.colorScheme.onSurface) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Regresar",
-                            tint = TextWhite
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = BackgroundBlack
+                    containerColor = MaterialTheme.colorScheme.background
                 )
             )
         },
-        containerColor = BackgroundBlack
+        containerColor = MaterialTheme.colorScheme.background,
+        contentWindowInsets = WindowInsets(0.dp)
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
@@ -71,7 +72,7 @@ fun ProfileScreen(
                     modifier = Modifier
                         .size(100.dp)
                         .clip(CircleShape)
-                        .background(CardGray),
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
@@ -88,13 +89,13 @@ fun ProfileScreen(
                     text = "Juan Pérez",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
-                    color = TextWhite
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 
                 Text(
                     text = "Conductor",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = TextGrayLight
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -178,14 +179,14 @@ fun ProfileInfoSection(title: String, items: List<ProfileInfoItem>) {
         Text(
             text = title,
             style = MaterialTheme.typography.titleSmall,
-            color = TextGrayLight,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontWeight = FontWeight.Bold
         )
         
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = CardGray),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
             border = CardDefaults.outlinedCardBorder()
         ) {
             Column(
@@ -205,8 +206,8 @@ fun ProfileInfoSection(title: String, items: List<ProfileInfoItem>) {
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Column {
-                            Text(text = item.label, fontSize = 12.sp, color = TextGrayLight)
-                            Text(text = item.value, fontSize = 14.sp, color = TextWhite, fontWeight = FontWeight.Medium)
+                            Text(text = item.label, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(text = item.value, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Medium)
                         }
                     }
                 }

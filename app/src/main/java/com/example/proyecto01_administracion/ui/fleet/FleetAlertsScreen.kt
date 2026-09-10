@@ -18,13 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.proyecto01_administracion.ui.theme.AccentBlue
-import com.example.proyecto01_administracion.ui.theme.BackgroundBlack
-import com.example.proyecto01_administracion.ui.theme.CardGray
-import com.example.proyecto01_administracion.ui.theme.StatusRed
-import com.example.proyecto01_administracion.ui.theme.StatusYellow
-import com.example.proyecto01_administracion.ui.theme.TextGrayLight
-import com.example.proyecto01_administracion.ui.theme.TextWhite
+import com.example.proyecto01_administracion.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,9 +26,9 @@ fun FleetAlertsScreen(
     onBack: () -> Unit
 ) {
     val alerts = listOf(
-        FleetAlert("Urgente", "ABC-123: Cambio de frenos atrasado por 200km", StatusRed),
+        FleetAlert("Urgente", "ABC-123: Cambio de frenos atrasado por 200 km", StatusRed),
         FleetAlert("Urgente", "GHI-789: Revisión técnica vence mañana", StatusRed),
-        FleetAlert("Próxima", "DEF-456: Mantenimiento preventivo en 500km", StatusYellow),
+        FleetAlert("Próxima", "DEF-456: Mantenimiento preventivo en 500 km", StatusYellow),
         FleetAlert("Próxima", "JKL-012: Seguro vence en 15 días", StatusYellow),
         FleetAlert("Informativa", "MNO-345: Nuevo registro de kilometraje", AccentBlue)
     )
@@ -42,22 +36,23 @@ fun FleetAlertsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Alertas de Flota", color = TextWhite) },
+                title = { Text("Alertas de Flota", color = MaterialTheme.colorScheme.onSurface) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Regresar",
-                            tint = TextWhite
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = BackgroundBlack
+                    containerColor = MaterialTheme.colorScheme.background
                 )
             )
         },
-        containerColor = BackgroundBlack
+        containerColor = MaterialTheme.colorScheme.background,
+        contentWindowInsets = WindowInsets(0.dp)
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
@@ -81,7 +76,7 @@ fun FleetAlertCard(alert: FleetAlert) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = CardGray),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
         border = CardDefaults.outlinedCardBorder()
     ) {
         Row(
@@ -105,7 +100,7 @@ fun FleetAlertCard(alert: FleetAlert) {
             Column {
                 Text(text = alert.type, color = alert.color, fontWeight = FontWeight.Bold, fontSize = 12.sp)
                 Spacer(modifier = Modifier.height(4.dp))
-                Text(text = alert.message, color = TextWhite, style = MaterialTheme.typography.bodyMedium, lineHeight = 20.sp)
+                Text(text = alert.message, color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyMedium, lineHeight = 20.sp)
             }
         }
     }

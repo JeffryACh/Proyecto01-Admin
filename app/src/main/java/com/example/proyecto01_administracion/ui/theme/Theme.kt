@@ -36,13 +36,16 @@ private val LightColorScheme = lightColorScheme(
     primary = AccentBlue,
     secondary = AccentPurple,
     tertiary = AccentBluePurple,
-    background = TextWhite,
-    surface = Color(0xFFF5F5F5),
-    onPrimary = TextWhite,
-    onSecondary = TextWhite,
-    onTertiary = TextWhite,
-    onBackground = BackgroundBlack,
-    onSurface = BackgroundBlack
+    background = BackgroundWhite,
+    surface = SurfaceWhite,
+    onPrimary = Color.White,
+    onSecondary = Color.White,
+    onTertiary = Color.White,
+    onBackground = TextBlack,
+    onSurface = TextBlack,
+    surfaceVariant = SurfaceGrayLight,
+    onSurfaceVariant = TextGrayDark,
+    outline = BorderGrayLight
 )
 
 @Composable

@@ -18,7 +18,9 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.proyecto01_administracion.ui.dashboard.VehicleSummary
 import com.example.proyecto01_administracion.ui.theme.*
+import java.util.Locale
 
 data class MileageRecord(
     val date: String,
@@ -44,16 +46,21 @@ fun MileageHistoryScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Historial de kilometraje", fontWeight = FontWeight.Bold, color = Color.White) },
+                title = { Text("Historial de kilometraje", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Regresar", tint = Color.White)
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Regresar",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = BackgroundBlack)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
             )
         },
-        containerColor = BackgroundBlack
+        containerColor = MaterialTheme.colorScheme.background,
+        contentWindowInsets = WindowInsets(0.dp)
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
@@ -61,14 +68,10 @@ fun MileageHistoryScreen(
                 .padding(innerPadding)
                 .padding(horizontal = 24.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp),
-            contentPadding = PaddingValues(bottom = 24.dp)
+            contentPadding = PaddingValues(top = 16.dp, bottom = 24.dp)
         ) {
             item {
-                // Vehicle Identification
-                Column {
-                    Text("Toyota Hilux", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = Color.White)
-                    Text("ABC-123", style = MaterialTheme.typography.bodyMedium, color = TextGrayLight)
-                }
+                VehicleSummary(model = "Toyota Hilux", plate = "ABC-123")
             }
 
             item {
@@ -76,13 +79,13 @@ fun MileageHistoryScreen(
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(containerColor = CardGray),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
                     border = CardDefaults.outlinedCardBorder()
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
-                        Text("Kilometraje actual", style = MaterialTheme.typography.labelSmall, color = TextGrayMedium)
-                        Text("125,430 km", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = Color.White)
-                        Text("Último registro: 25 Ago 2026 · Registros: 7", style = MaterialTheme.typography.bodySmall, color = TextGrayLight)
+                        Text("Kilometraje actual", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("125,430 km", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                        Text("Último registro: 25 Ago 2026 · Registros: 7", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         
                         Spacer(modifier = Modifier.height(24.dp))
                         
@@ -113,11 +116,11 @@ fun MileageHistoryScreen(
                     text = "Registros",
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
 
-            itemsIndexed(records) { index, record ->
+            itemsIndexed(records) { _, record ->
                 MileageItem(record = record)
             }
         }
@@ -192,7 +195,7 @@ fun MileageItem(record: MileageRecord) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = CardGray),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
         border = CardDefaults.outlinedCardBorder()
     ) {
         Row(
@@ -203,8 +206,8 @@ fun MileageItem(record: MileageRecord) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column {
-                Text(record.date, style = MaterialTheme.typography.labelSmall, color = TextGrayMedium)
-                Text("${record.mileage} km", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, color = Color.White)
+                Text(record.date, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("${String.format(Locale.US, "%,d", record.mileage)} km", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
             }
             
             if (record.difference != null) {
@@ -213,7 +216,7 @@ fun MileageItem(record: MileageRecord) {
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(
-                        text = "+${record.difference} km",
+                        text = "+${String.format(Locale.US, "%,d", record.difference)} km",
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                         color = AccentBlue,
                         fontSize = 12.sp,

@@ -57,12 +57,12 @@ fun VehicleCard(
                         text = model,
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
                         text = plate,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = TextGrayLight
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -78,13 +78,13 @@ fun VehicleCard(
                     Text(
                         text = "Kilometraje actual",
                         style = MaterialTheme.typography.labelSmall,
-                        color = TextGrayMedium
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
                         text = mileage,
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.SemiBold,
-                        color = Color.White
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
                 StatusIndicator(status = status)
@@ -92,14 +92,14 @@ fun VehicleCard(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
+            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
 
             Spacer(modifier = Modifier.height(20.dp))
 
             Text(
                 text = "Próximo mantenimiento",
                 style = MaterialTheme.typography.labelSmall,
-                color = TextGrayMedium
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             
             Row(
@@ -111,7 +111,7 @@ fun VehicleCard(
                     text = nextMaintenanceTask,
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
                     text = "En $remainingKm",

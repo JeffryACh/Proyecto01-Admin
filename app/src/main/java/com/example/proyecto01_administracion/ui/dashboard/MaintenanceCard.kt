@@ -2,8 +2,6 @@ package com.example.proyecto01_administracion.ui.dashboard
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -37,12 +35,12 @@ fun MaintenanceCard(
                 text = "Último mantenimiento",
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
-                color = Color.White
+                color = MaterialTheme.colorScheme.onSurface
             )
             Text(
                 text = date,
                 style = MaterialTheme.typography.bodySmall,
-                color = TextGrayLight
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -55,26 +53,26 @@ fun MaintenanceCard(
                     Text(
                         text = "Tipo",
                         style = MaterialTheme.typography.labelSmall,
-                        color = TextGrayMedium
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
                         text = type,
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.SemiBold,
-                        color = Color.White
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
                 Column {
                     Text(
                         text = "Kilometraje",
                         style = MaterialTheme.typography.labelSmall,
-                        color = TextGrayMedium
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
                         text = mileage,
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.SemiBold,
-                        color = Color.White
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }
@@ -85,7 +83,6 @@ fun MaintenanceCard(
 
             HistoryLink(
                 text = "Ver historial de mantenimientos",
-                icon = Icons.AutoMirrored.Filled.List,
                 onClick = onViewHistory
             )
         }

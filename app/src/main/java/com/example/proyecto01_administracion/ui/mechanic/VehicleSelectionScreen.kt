@@ -17,15 +17,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.example.proyecto01_administracion.ui.theme.AccentBlue
-import com.example.proyecto01_administracion.ui.theme.BackgroundBlack
-import com.example.proyecto01_administracion.ui.theme.CardGray
-import com.example.proyecto01_administracion.ui.theme.StatusGreen
-import com.example.proyecto01_administracion.ui.theme.StatusRed
-import com.example.proyecto01_administracion.ui.theme.StatusYellow
-import com.example.proyecto01_administracion.ui.theme.TextGrayLight
-import com.example.proyecto01_administracion.ui.theme.TextWhite
+import com.example.proyecto01_administracion.ui.dashboard.VehicleSummary
+import com.example.proyecto01_administracion.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,32 +29,36 @@ fun VehicleSelectionScreen(
     var searchQuery by remember { mutableStateOf("") }
 
     val vehicles = listOf(
-        VehicleItem("ABC-123", "Toyota Hilux", "Al día", StatusGreen),
-        VehicleItem("DEF-456", "Hyundai H1", "Próximo", StatusYellow),
-        VehicleItem("GHI-789", "Freightliner Cascadia", "Atrasado", StatusRed),
-        VehicleItem("JKL-012", "Isuzu NPR", "Al día", StatusGreen),
-        VehicleItem("MNO-345", "Mercedes-Benz Actros", "Al día", StatusGreen)
+        MechanicVehicleItem("ABC-123", "Toyota Hilux", "125,430 km", "Juan Pérez", StatusGreen),
+        MechanicVehicleItem("XYZ-456", "Isuzu NPR", "98,240 km", "María López", StatusYellow),
+        MechanicVehicleItem("DEF-789", "Ford Transit", "87,650 km", "Carlos Rodríguez", StatusRed)
     )
+
+    val filteredVehicles = vehicles.filter { 
+        it.plate.contains(searchQuery, ignoreCase = true) || 
+        it.model.contains(searchQuery, ignoreCase = true) 
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Seleccionar Vehículo", color = TextWhite) },
+                title = { Text("Seleccionar Vehículo", color = MaterialTheme.colorScheme.onSurface) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Regresar",
-                            tint = TextWhite
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = BackgroundBlack
+                    containerColor = MaterialTheme.colorScheme.background
                 )
             )
         },
-        containerColor = BackgroundBlack
+        containerColor = MaterialTheme.colorScheme.background,
+        contentWindowInsets = WindowInsets(0.dp)
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -70,65 +67,66 @@ fun VehicleSelectionScreen(
                 .padding(horizontal = 24.dp)
         ) {
             Spacer(modifier = Modifier.height(16.dp))
-            
+
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
-                placeholder = { Text("Buscar por placa o modelo...", color = TextGrayLight) },
+                placeholder = { Text("Buscar por placa o modelo", color = MaterialTheme.colorScheme.onSurfaceVariant) },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = AccentBlue) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = CardGray,
-                    unfocusedContainerColor = CardGray,
+                    focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                     focusedBorderColor = AccentBlue,
                     unfocusedBorderColor = Color.Transparent,
-                    focusedTextColor = TextWhite
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface
                 )
             )
-            
+
             Spacer(modifier = Modifier.height(24.dp))
-            
+
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
-                contentPadding = PaddingValues(bottom = 24.dp)
+                contentPadding = PaddingValues(bottom = 32.dp)
             ) {
-                items(vehicles.filter { it.plate.contains(searchQuery, true) || it.model.contains(searchQuery, true) }) { vehicle ->
-                    VehicleSelectionCard(vehicle = vehicle, onClick = { onVehicleSelected(vehicle.plate) })
+                items(filteredVehicles) { vehicle ->
+                    MechanicVehicleCard(
+                        vehicle = vehicle,
+                        onClick = { onVehicleSelected(vehicle.plate) }
+                    )
                 }
             }
         }
     }
 }
 
-data class VehicleItem(val plate: String, val model: String, val status: String, val statusColor: Color)
+data class MechanicVehicleItem(
+    val plate: String,
+    val model: String,
+    val mileage: String,
+    val conductor: String,
+    val statusColor: Color
+)
 
 @Composable
-fun VehicleSelectionCard(vehicle: VehicleItem, onClick: () -> Unit) {
+fun MechanicVehicleCard(vehicle: MechanicVehicleItem, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = CardGray),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
         border = CardDefaults.outlinedCardBorder()
     ) {
         Row(
-            modifier = Modifier
-                .padding(20.dp)
-                .fillMaxWidth(),
+            modifier = Modifier.padding(20.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Column {
-                Text(text = vehicle.model, fontWeight = FontWeight.Bold, color = TextWhite, fontSize = 16.sp)
-                Text(text = vehicle.plate, color = TextGrayLight, fontSize = 14.sp)
-            }
-            
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Box(modifier = Modifier.size(8.dp).background(vehicle.statusColor, CircleShape))
-                Text(text = vehicle.status, color = vehicle.statusColor, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-            }
+            VehicleSummary(model = vehicle.model, plate = vehicle.plate)
+            Box(modifier = Modifier.size(12.dp).background(vehicle.statusColor, CircleShape))
         }
     }
 }

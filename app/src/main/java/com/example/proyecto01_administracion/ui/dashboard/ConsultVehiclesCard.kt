@@ -3,8 +3,6 @@ package com.example.proyecto01_administracion.ui.dashboard
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -60,7 +58,6 @@ fun ConsultVehiclesCard(
 
             HistoryLink(
                 text = "Ver todos los vehículos",
-                icon = Icons.Default.DirectionsCar,
                 onClick = onViewAll
             )
         }
@@ -86,19 +83,19 @@ private fun ConsultVehicleItem(
                 text = model,
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Bold,
-                color = Color.White
+                color = MaterialTheme.colorScheme.onSurface
             )
             Text(
                 text = plate,
                 style = MaterialTheme.typography.bodySmall,
-                color = TextGrayMedium
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
         
         Text(
             text = mileage,
             style = MaterialTheme.typography.bodyMedium,
-            color = TextGrayLight,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontWeight = FontWeight.Medium
         )
     }

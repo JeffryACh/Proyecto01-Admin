@@ -19,11 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.proyecto01_administracion.ui.theme.AccentBlue
-import com.example.proyecto01_administracion.ui.theme.BackgroundBlack
-import com.example.proyecto01_administracion.ui.theme.CardGray
-import com.example.proyecto01_administracion.ui.theme.TextGrayLight
-import com.example.proyecto01_administracion.ui.theme.TextWhite
+import com.example.proyecto01_administracion.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,27 +29,28 @@ fun ReportsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Reportes y Estadísticas", color = TextWhite) },
+                title = { Text("Reportes y Estadísticas", color = MaterialTheme.colorScheme.onSurface) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Regresar",
-                            tint = TextWhite
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 },
                 actions = {
                     IconButton(onClick = { /* Filter */ }) {
-                        Icon(imageVector = Icons.Default.FilterList, contentDescription = "Filtrar", tint = TextWhite)
+                        Icon(imageVector = Icons.Default.FilterList, contentDescription = "Filtrar", tint = MaterialTheme.colorScheme.onSurface)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = BackgroundBlack
+                    containerColor = MaterialTheme.colorScheme.background
                 )
             )
         },
-        containerColor = BackgroundBlack
+        containerColor = MaterialTheme.colorScheme.background,
+        contentWindowInsets = WindowInsets(0.dp)
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
@@ -67,38 +64,38 @@ fun ReportsScreen(
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(containerColor = CardGray),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
                     border = CardDefaults.outlinedCardBorder()
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             Icon(Icons.Default.DateRange, contentDescription = null, tint = AccentBlue, modifier = Modifier.size(20.dp))
-                            Text(text = "Últimos 30 días", color = TextGrayLight, style = MaterialTheme.typography.bodySmall)
+                            Text(text = "Últimos 30 días", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
                         }
                         Spacer(modifier = Modifier.height(16.dp))
-                        Text(text = "Costo Total Mantenimiento", color = TextGrayLight, fontSize = 14.sp)
-                        Text(text = "$4,250.00", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = TextWhite)
+                        Text(text = "Costo Total Mantenimiento", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
+                        Text(text = "$4,250.00", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                     }
                 }
             }
             
             item {
-                Text(text = "Distribución por Tipo", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = TextWhite)
+                Text(text = "Distribución por Tipo", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                 Spacer(modifier = Modifier.height(16.dp))
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     ReportBar(label = "Preventivo", value = 65, color = AccentBlue)
-                    ReportBar(label = "Correctivo", value = 25, color = Color(0xFFF44336))
-                    ReportBar(label = "Predictivo", value = 10, color = Color(0xFF4CAF50))
+                    ReportBar(label = "Correctivo", value = 25, color = StatusRed)
+                    ReportBar(label = "Predictivo", value = 10, color = StatusGreen)
                 }
             }
             
             item {
-                Text(text = "Top Vehículos por Gasto", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = TextWhite)
+                Text(text = "Top Vehículos por Gasto", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                 Spacer(modifier = Modifier.height(16.dp))
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(containerColor = CardGray),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
                     border = CardDefaults.outlinedCardBorder()
                 ) {
                     Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -116,10 +113,10 @@ fun ReportsScreen(
 fun ReportBar(label: String, value: Int, color: Color) {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(text = label, color = TextGrayLight, fontSize = 12.sp)
-            Text(text = "$value%", color = TextWhite, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+            Text(text = label, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
+            Text(text = "$value%", color = MaterialTheme.colorScheme.onSurface, fontSize = 12.sp, fontWeight = FontWeight.Bold)
         }
-        Box(modifier = Modifier.fillMaxWidth().height(8.dp).clip(CircleShape).background(CardGray)) {
+        Box(modifier = Modifier.fillMaxWidth().height(8.dp).clip(CircleShape).background(MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))) {
             Box(modifier = Modifier.fillMaxWidth(value / 100f).fillMaxHeight().background(color, CircleShape))
         }
     }
@@ -130,8 +127,8 @@ fun VehicleExpenseItem(plate: String, amount: String) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Icon(Icons.Default.BarChart, contentDescription = null, tint = AccentBlue, modifier = Modifier.size(20.dp))
-            Text(text = plate, color = TextWhite, fontWeight = FontWeight.Medium)
+            Text(text = plate, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Medium)
         }
-        Text(text = amount, color = TextWhite, fontWeight = FontWeight.Bold)
+        Text(text = amount, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
     }
 }
