@@ -16,6 +16,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -41,6 +42,8 @@ data class Alert(
 fun AlertsScreen(
     onBack: () -> Unit
 ) {
+    val semanticColors = LocalTransAndinaColors.current
+    
     val allAlerts = listOf(
         Alert(Icons.Default.Warning, "Mantenimiento atrasado", "El mantenimiento preventivo requiere atención.", AlertPriority.URGENT, "Hace 5 horas"),
         Alert(Icons.Default.Build, "Cambio de aceite próximo", "Faltan aproximadamente 450 km para el próximo mantenimiento.", AlertPriority.UPCOMING, "Hace 2 días"),
@@ -65,7 +68,7 @@ fun AlertsScreen(
                         Text("Alertas", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                         Spacer(modifier = Modifier.width(8.dp))
                         Surface(
-                            color = StatusRed,
+                            color = semanticColors.statusRed,
                             shape = CircleShape
                         ) {
                             Text(
@@ -111,9 +114,9 @@ fun AlertsScreen(
                         .fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    AlertStat(count = "1", label = "Urgente", color = StatusRed)
-                    AlertStat(count = "2", label = "Próxima", color = StatusYellow)
-                    AlertStat(count = "2", label = "Info", color = AccentBlue)
+                    AlertStat(count = "1", label = "Urgente", color = semanticColors.statusRed)
+                    AlertStat(count = "2", label = "Próxima", color = semanticColors.statusYellow)
+                    AlertStat(count = "2", label = "Info", color = semanticColors.statusBlue)
                 }
             }
 
@@ -179,12 +182,19 @@ fun AlertFilterChip(selected: Boolean, label: String, onClick: () -> Unit) {
 
 @Composable
 fun AlertItemCard(alert: Alert) {
+    val semanticColors = LocalTransAndinaColors.current
+    val priorityColor = when(alert.priority) {
+        AlertPriority.URGENT -> semanticColors.statusRed
+        AlertPriority.UPCOMING -> semanticColors.statusYellow
+        AlertPriority.INFO -> semanticColors.statusBlue
+    }
+    
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
         border = CardDefaults.outlinedCardBorder().copy(
-            brush = androidx.compose.ui.graphics.SolidColor(alert.priority.color.copy(alpha = 0.5f))
+            brush = SolidColor(priorityColor.copy(alpha = 0.5f))
         )
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
@@ -195,10 +205,10 @@ fun AlertItemCard(alert: Alert) {
                 Box(
                     modifier = Modifier
                         .size(40.dp)
-                        .background(alert.priority.color.copy(alpha = 0.1f), CircleShape),
+                        .background(priorityColor.copy(alpha = 0.1f), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(imageVector = alert.typeIcon, contentDescription = null, tint = alert.priority.color, modifier = Modifier.size(20.dp))
+                    Icon(imageVector = alert.typeIcon, contentDescription = null, tint = priorityColor, modifier = Modifier.size(20.dp))
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 Column(modifier = Modifier.weight(1f)) {
@@ -206,14 +216,14 @@ fun AlertItemCard(alert: Alert) {
                     Text(text = alert.dateLabel, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 Surface(
-                    color = alert.priority.color.copy(alpha = 0.1f),
+                    color = priorityColor.copy(alpha = 0.1f),
                     shape = RoundedCornerShape(8.dp),
-                    border = BorderStroke(1.dp, alert.priority.color.copy(alpha = 0.3f))
+                    border = BorderStroke(1.dp, priorityColor.copy(alpha = 0.3f))
                 ) {
                     Text(
                         text = alert.priority.label,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        color = alert.priority.color,
+                        color = priorityColor,
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold
                     )

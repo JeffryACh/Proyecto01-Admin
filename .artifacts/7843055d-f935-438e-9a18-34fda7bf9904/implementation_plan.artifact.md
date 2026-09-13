@@ -1,48 +1,69 @@
-# Plan de Corrección de Regresiones — Menú "Más", Flota y Navegación
+# Plan de Pulido Visual — TransAndina
 
-Este plan aborda los problemas de UI y navegación reportados, asegurando que el menú "Más" abra desde la derecha, se cierre correctamente, y que la gestión de flota recupere sus filtros y estados visuales funcionales.
+Este plan detalla los ajustes visuales para mejorar el contraste en el tema claro, optimizar la densidad de información en la selección de vehículos y refinar la barra de navegación inferior.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> Se modificará la estructura de `MainActivity.kt` para usar `CompositionLocalProvider` con `LayoutDirection.Rtl` alrededor del Drawer de "Más", lo que garantiza que abra desde el lado derecho.
+> Se implementarán nuevos colores semánticos específicos para el tema claro para garantizar el cumplimiento de accesibilidad y contraste sobre fondo blanco.
+> Se ajustará la altura de la `BottomNavigation` y el tamaño de sus elementos para que sea más compacta pero con mayor presencia visual.
 
 ## Proposed Changes
 
-### [MainActivity & Navegación](file:///C:/Users/gabob/Documents/GitHub/Proyecto01-Admin/app/src/main/java/com/example/proyecto01_administracion/MainActivity.kt)
+### [Theming & Colors](file:///C:/Users/gabob/Documents/GitHub/Proyecto01-Admin/app/src/main/java/com/example/proyecto01_administracion/ui/theme/)
 
-#### [MODIFY] [MainActivity.kt](file:///C:/Users/gabob/Documents/GitHub/Proyecto01-Admin/app/src/main/java/com/example/proyecto01_administracion/MainActivity.kt)
-- **Menú "Más" (Derecha)**: Envolver el `ModalNavigationDrawer` de "Más" en `LocalLayoutDirection.Rtl` para que abra desde la derecha.
-- **Gestión de Estado**: Asegurar que `moreDrawerState` se cierre al navegar, al cerrar sesión y mediante el botón Atrás del sistema (`BackHandler`).
-- **Logout**: Limpiar `userRole`, cerrar ambos drawers (`profileDrawerState` y `moreDrawerState`) y navegar a `login`.
-- **Opciones del Menú**: Actualizar `MoreOptionsMenu` para incluir rutas válidas y completas según el rol.
-- **Bottom Navigation**: Asegurar que la altura sea consistente y no cause espacios negros excesivos (revisar insets y paddings).
+#### [MODIFY] [Color.kt](file:///C:/Users/gabob/Documents/GitHub/Proyecto01-Admin/app/src/main/java/com/example/proyecto01_administracion/ui/theme/Color.kt)
+- Definir colores semánticos para Light Theme:
+    - Verde: `#12A40A`
+    - Rojo: `#D00202`
+    - Amarillo: `#FFC300`
+    - Azul Semántico: `#0A1FA4`
+- Acentuar grises de Light Theme para mejorar contraste:
+    - `BackgroundWhite`: `#F1F3F5`
+    - `SurfaceGrayLight`: `#E9ECEF`
+    - `BorderGrayLight`: `#CED4DA`
 
-### [Gestión de Flota](file:///C:/Users/gabob/Documents/GitHub/Proyecto01-Admin/app/src/main/java/com/example/proyecto01_administracion/ui/fleet/FleetManagementScreen.kt)
+#### [MODIFY] [Theme.kt](file:///C:/Users/gabob/Documents/GitHub/Proyecto01-Admin/app/src/main/java/com/example/proyecto01_administracion/ui/theme/Theme.kt)
+- Implementar un sistema para proveer estos colores semánticos según el tema activo (usando una función auxiliar o CompositionLocal).
+
+### [Pantallas de Flota & Gestión](file:///C:/Users/gabob/Documents/GitHub/Proyecto01-Admin/app/src/main/java/com/example/proyecto01_administracion/ui/fleet/)
+
+#### [MODIFY] [ReportsScreen.kt](file:///C:/Users/gabob/Documents/GitHub/Proyecto01-Admin/app/src/main/java/com/example/proyecto01_administracion/ui/fleet/ReportsScreen.kt)
+- Eliminar el botón de filtro en la esquina superior derecha que no tiene funcionalidad.
 
 #### [MODIFY] [FleetManagementScreen.kt](file:///C:/Users/gabob/Documents/GitHub/Proyecto01-Admin/app/src/main/java/com/example/proyecto01_administracion/ui/fleet/FleetManagementScreen.kt)
-- **Filtros**: Restaurar los filtros "Todos", "Al día", "Próximos", "Atrasados".
-- **Lógica de Filtrado**: Implementar el filtrado real de la lista de vehículos basado en el estado seleccionado.
-- **Visualización**: Actualizar los indicadores de estado en las tarjetas de vehículo y el resumen superior para que coincidan con el estilo de las Alertas del Conductor.
+- Refinar las `FleetSummaryCard` para que se sientan más integradas y con mejor tipografía.
 
-### [Bottom Navigation Components](file:///C:/Users/gabob/Documents/GitHub/Proyecto01-Admin/app/src/main/java/com/example/proyecto01_administracion/ui/dashboard/)
+### [Mecánico — Selección de Vehículo](file:///C:/Users/gabob/Documents/GitHub/Proyecto01-Admin/app/src/main/java/com/example/proyecto01_administracion/ui/mechanic/)
 
-#### [MODIFY] [BottomNavBar.kt](file:///C:/Users/gabob/Documents/GitHub/Proyecto01-Admin/app/src/main/java/com/example/proyecto01_administracion/ui/dashboard/BottomNavBar.kt)
-#### [MODIFY] [MechanicBottomNavBar.kt](file:///C:/Users/gabob/Documents/GitHub/Proyecto01-Admin/app/src/main/java/com/example/proyecto01_administracion/ui/dashboard/MechanicBottomNavBar.kt)
-#### [MODIFY] [FleetBottomNavBar.kt](file:///C:/Users/gabob/Documents/GitHub/Proyecto01-Admin/app/src/main/java/com/example/proyecto01_administracion/ui/dashboard/FleetBottomNavBar.kt)
-- **Estandarización**: Asegurar que el componente `NavigationBar` tenga un tamaño y padding consistente, evitando espacios negros duplicados en combinación con los insets del sistema.
+#### [MODIFY] [VehicleSelectionScreen.kt](file:///C:/Users/gabob/Documents/GitHub/Proyecto01-Admin/app/src/main/java/com/example/proyecto01_administracion/ui/mechanic/VehicleSelectionScreen.kt)
+- Reducir altura y padding vertical de las tarjetas de vehículo.
+- Disminuir tamaño de fuente de la placa (`ABC-123`).
+- Mover el indicador de estado al extremo derecho de la tarjeta.
+- Aplicar nuevos colores semánticos a los estados.
+
+### [Navegación Inferior](file:///C:/Users/gabob/Documents/GitHub/Proyecto01-Admin/app/src/main/java/com/example/proyecto01_administracion/ui/dashboard/)
+
+#### [MODIFY] [BottomNavBar.kt](file:///C:/Users/gabob/Documents/GitHub/Proyecto01-Admin/app/src/main/java/com/example/proyecto01_administracion/ui/dashboard/BottomNavBar.kt) (y equivalentes para Mecánico/Encargado)
+- Ajustar `NavigationBar` para que sea ligeramente menos alta.
+- Aumentar tamaño de iconos y etiquetas de texto.
+- Optimizar espaciado interno para evitar "espacio muerto".
+
+### [Estabilidad & Estados](file:///C:/Users/gabob/Documents/GitHub/Proyecto01-Admin/app/src/main/java/com/example/proyecto01_administracion/MainActivity.kt)
+
+#### [MODIFY] [MainActivity.kt](file:///C:/Users/gabob/Documents/GitHub/Proyecto01-Admin/app/src/main/java/com/example/proyecto01_administracion/MainActivity.kt)
+- Cambiar `remember` por `rememberSaveable` en estados críticos como `userRole` e `isDarkTheme` para evitar que la BottomNav desaparezca o el rol se pierda al rotar la pantalla o cambiar el tema del sistema.
 
 ## Verification Plan
 
 ### Manual Verification
-1.  **Menú "Más"**:
-    - Verificar que abre desde el lado DERECHO al presionar "Más" en la BottomNav.
-    - Confirmar que se cierra al tocar fuera, presionar Atrás o seleccionar una opción.
-    - Verificar que al cerrar sesión el menú no queda abierto sobre la pantalla de Login.
-2.  **Gestión de Flota**:
-    - Seleccionar cada filtro (Todos, Al día, Próximos, Atrasados) y verificar que la lista se actualiza correctamente.
-    - Comprobar que los colores y etiquetas de estado son correctos.
-3.  **Bottom Navigation**:
-    - Navegar por varias pantallas y verificar que la altura de la barra inferior es constante y no deja espacios negros excesivos.
-4.  **Logout**:
-    - Realizar el flujo de Logout y verificar que se llega a la pantalla de Login limpia (sin barras de navegación ni menús laterales activos).
+1.  **Light Theme**:
+    - Verificar que los nuevos colores semánticos se aplican correctamente en alertas y estados.
+    - Confirmar que los grises permiten distinguir mejor las tarjetas del fondo.
+2.  **Bottom Navigation**:
+    - Cambiar entre temas y verificar que la barra no desaparece.
+    - Verificar que los iconos y textos son más grandes y la barra es más compacta.
+3.  **Selección de Vehículo**:
+    - Verificar la nueva distribución (Estado a la derecha) y tamaño de fuente de la placa.
+4.  **Reportes**:
+    - Confirmar que el botón fantasma ha sido eliminado.

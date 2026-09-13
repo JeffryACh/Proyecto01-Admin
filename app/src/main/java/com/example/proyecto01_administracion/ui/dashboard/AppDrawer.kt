@@ -7,6 +7,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
@@ -21,10 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.proyecto01_administracion.ui.theme.AccentBlue
-import com.example.proyecto01_administracion.ui.theme.BackgroundBlack
-import com.example.proyecto01_administracion.ui.theme.CardGray
-import com.example.proyecto01_administracion.ui.theme.TextGrayLight
-import com.example.proyecto01_administracion.ui.theme.TextWhite
+import com.example.proyecto01_administracion.ui.theme.LocalTransAndinaColors
 
 @Composable
 fun AppDrawer(
@@ -33,8 +31,11 @@ fun AppDrawer(
     onLogout: () -> Unit,
     onProfileClick: () -> Unit,
     onSettingsClick: () -> Unit = {},
-    onUsersManagementClick: (() -> Unit)? = null
+    onUsersManagementClick: (() -> Unit)? = null,
+    onEditProfileClick: () -> Unit = {}
 ) {
+    val semanticColors = LocalTransAndinaColors.current
+    
     ModalDrawerSheet(
         drawerContainerColor = MaterialTheme.colorScheme.background,
         drawerShape = RoundedCornerShape(topEnd = 24.dp, bottomEnd = 24.dp),
@@ -65,7 +66,7 @@ fun AppDrawer(
                     Icon(
                         imageVector = Icons.Default.Person,
                         contentDescription = null,
-                        tint = TextGrayLight,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(32.dp)
                     )
                 }
@@ -91,6 +92,12 @@ fun AppDrawer(
                 label = "Perfil",
                 icon = Icons.Default.Person,
                 onClick = onProfileClick
+            )
+
+            DrawerItem(
+                label = "Editar perfil",
+                icon = Icons.Default.Edit,
+                onClick = onEditProfileClick
             )
 
             if (onUsersManagementClick != null) {
@@ -119,8 +126,8 @@ fun AppDrawer(
                 icon = { Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = null) },
                 colors = NavigationDrawerItemDefaults.colors(
                     unselectedContainerColor = Color.Transparent,
-                    unselectedIconColor = Color(0xFFF44336),
-                    unselectedTextColor = Color(0xFFF44336)
+                    unselectedIconColor = semanticColors.statusRed,
+                    unselectedTextColor = semanticColors.statusRed
                 ),
                 modifier = Modifier.padding(vertical = 16.dp)
             )

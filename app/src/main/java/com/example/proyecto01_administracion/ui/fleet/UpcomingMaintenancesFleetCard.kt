@@ -67,6 +67,14 @@ private fun MaintenanceFleetItem(
     remaining: String,
     statusColor: Color
 ) {
+    val semanticColors = LocalTransAndinaColors.current
+    val displayColor = when(statusColor) {
+        StatusGreen -> semanticColors.statusGreen
+        StatusYellow -> semanticColors.statusYellow
+        StatusRed -> semanticColors.statusRed
+        else -> statusColor
+    }
+    
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -97,13 +105,13 @@ private fun MaintenanceFleetItem(
             Box(
                 modifier = Modifier
                     .size(8.dp)
-                    .background(statusColor, CircleShape)
+                    .background(displayColor, CircleShape)
             )
             Text(
                 text = remaining,
                 style = MaterialTheme.typography.bodySmall,
                 fontWeight = FontWeight.Medium,
-                color = statusColor
+                color = displayColor
             )
         }
     }

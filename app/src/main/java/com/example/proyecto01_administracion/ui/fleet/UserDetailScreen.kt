@@ -33,6 +33,7 @@ fun UserDetailScreen(
     onEdit: () -> Unit,
     onReassignVehicle: () -> Unit
 ) {
+    val semanticColors = LocalTransAndinaColors.current
     var showSuspendDialog by remember { mutableStateOf(false) }
 
     if (showSuspendDialog) {
@@ -42,7 +43,7 @@ fun UserDetailScreen(
             text = { Text("¿Deseas suspender esta cuenta?", color = MaterialTheme.colorScheme.onSurfaceVariant) },
             confirmButton = {
                 TextButton(onClick = { showSuspendDialog = false }) {
-                    Text("Confirmar", color = StatusRed)
+                    Text("Confirmar", color = semanticColors.statusRed)
                 }
             },
             dismissButton = {
@@ -147,8 +148,8 @@ fun UserDetailScreen(
                     onClick = { showSuspendDialog = true },
                     modifier = Modifier.fillMaxWidth().height(56.dp),
                     shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = StatusRed),
-                    border = ButtonDefaults.outlinedButtonBorder(enabled = true).copy(brush = SolidColor(StatusRed))
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = semanticColors.statusRed),
+                    border = ButtonDefaults.outlinedButtonBorder(enabled = true).copy(brush = SolidColor(semanticColors.statusRed))
                 ) {
                     Icon(imageVector = Icons.Default.Block, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))

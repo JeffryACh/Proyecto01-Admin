@@ -1,17 +1,16 @@
 package com.example.proyecto01_administracion.ui.dashboard
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.proyecto01_administracion.ui.theme.BackgroundBlack
-import com.example.proyecto01_administracion.ui.theme.TextGrayLight
-import com.example.proyecto01_administracion.ui.theme.TextWhite
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,11 +44,29 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(8.dp))
             
             SettingsToggleItem(label = "Notificaciones", initialValue = true, onCheckedChange = {})
-            SettingsToggleItem(
-                label = "Tema Oscuro", 
-                initialValue = isDarkTheme,
-                onCheckedChange = onThemeToggle
-            )
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            Text("Tema", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(12.dp))
+            
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(24.dp)
+            ) {
+                ThemeOption(
+                    label = "Claro",
+                    selected = !isDarkTheme,
+                    onClick = { onThemeToggle(false) }
+                )
+                ThemeOption(
+                    label = "Oscuro",
+                    selected = isDarkTheme,
+                    onClick = { onThemeToggle(true) }
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(16.dp))
             
             HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
             
@@ -62,11 +79,26 @@ fun SettingsScreen(
 }
 
 @Composable
+fun ThemeOption(label: String, selected: Boolean, onClick: () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.clickable(onClick = onClick)
+    ) {
+        RadioButton(
+            selected = selected,
+            onClick = onClick,
+            colors = RadioButtonDefaults.colors(selectedColor = MaterialTheme.colorScheme.primary)
+        )
+        Text(text = label, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
+    }
+}
+
+@Composable
 fun SettingsToggleItem(label: String, initialValue: Boolean, onCheckedChange: (Boolean) -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Text(text = label, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
         Switch(

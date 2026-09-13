@@ -8,6 +8,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
@@ -47,14 +48,14 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainApp() {
-    var isDarkTheme by remember { mutableStateOf(true) }
+    var isDarkTheme by rememberSaveable { mutableStateOf(true) }
     
     Proyecto01AdministracionTheme(darkTheme = isDarkTheme) {
         val navController = rememberNavController()
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
         
-        var userRole by remember { mutableStateOf(UserRole.NONE) }
+        var userRole by rememberSaveable { mutableStateOf(UserRole.NONE) }
         val profileDrawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
         val moreDrawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
         val scope = rememberCoroutineScope()
@@ -67,7 +68,7 @@ fun MainApp() {
             }
         }
 
-        val isAuthScreen = currentRoute == "login" || currentRoute == "password_recovery" || currentRoute == null
+        val isAuthScreen = currentRoute == "login" || currentRoute == "password_recovery" || (currentRoute == null && userRole == UserRole.NONE)
 
         if (isAuthScreen) {
             AppNavigation(
@@ -108,11 +109,15 @@ fun MainApp() {
                         onSettingsClick = {
                             scope.launch { profileDrawerState.close() }
                             navController.navigate("settings")
+                        },
+                        onEditProfileClick = {
+                            scope.launch { profileDrawerState.close() }
+                            navController.navigate("edit_profile")
                         }
                     )
                 }
             ) {
-                // El menú "Más" debe abrirse desde la derecha
+                // El menú "Menú Rápido" debe abrirse desde la derecha
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                     ModalNavigationDrawer(
                         drawerState = moreDrawerState,
@@ -197,7 +202,7 @@ fun MoreOptionsMenu(role: UserRole, onOptionClick: (String) -> Unit) {
             .statusBarsPadding()
     ) {
         Text(
-            text = "Opciones",
+            text = "Menú Rápido",
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onBackground

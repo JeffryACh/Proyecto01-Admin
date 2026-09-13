@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -26,6 +27,13 @@ enum class VehicleStatus(val label: String, val color: Color) {
 
 @Composable
 fun StatusIndicator(status: VehicleStatus) {
+    val semanticColors = LocalTransAndinaColors.current
+    val color = when (status) {
+        VehicleStatus.ON_TRACK -> semanticColors.statusGreen
+        VehicleStatus.UPCOMING -> semanticColors.statusYellow
+        VehicleStatus.DELAYED -> semanticColors.statusRed
+    }
+    
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -33,7 +41,7 @@ fun StatusIndicator(status: VehicleStatus) {
         Box(
             modifier = Modifier
                 .size(10.dp)
-                .background(status.color, CircleShape)
+                .background(color, CircleShape)
         )
         Text(
             text = status.label,
@@ -101,18 +109,20 @@ fun HistoryLink(
 fun VehicleSummary(
     model: String,
     plate: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    modelStyle: TextStyle = MaterialTheme.typography.headlineMedium,
+    plateStyle: TextStyle = MaterialTheme.typography.titleMedium
 ) {
     Column(modifier = modifier) {
         Text(
             text = model,
-            style = MaterialTheme.typography.headlineMedium,
+            style = modelStyle,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface
         )
         Text(
             text = plate,
-            style = MaterialTheme.typography.titleMedium,
+            style = plateStyle,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
@@ -154,9 +164,10 @@ fun StatCard(
             )
             Text(
                 text = label,
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                lineHeight = 16.sp
+                lineHeight = 20.sp
             )
         }
     }

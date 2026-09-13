@@ -17,16 +17,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.proyecto01_administracion.ui.theme.AccentBlue
-import com.example.proyecto01_administracion.ui.theme.BackgroundBlack
-import com.example.proyecto01_administracion.ui.theme.CardGray
+import com.example.proyecto01_administracion.ui.theme.LocalTransAndinaColors
 import com.example.proyecto01_administracion.ui.theme.StatusGreen
-import com.example.proyecto01_administracion.ui.theme.TextGrayLight
-import com.example.proyecto01_administracion.ui.theme.TextWhite
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,6 +33,8 @@ fun ProfileScreen(
     onNavigateToEditProfile: () -> Unit,
     onLogout: () -> Unit
 ) {
+    val semanticColors = LocalTransAndinaColors.current
+    
     Scaffold(
         topBar = {
             TopAppBar(
@@ -156,8 +156,8 @@ fun ProfileScreen(
                     onClick = onLogout,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
-                    border = ButtonDefaults.outlinedButtonBorder(enabled = true).copy(brush = androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.error))
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = semanticColors.statusRed),
+                    border = ButtonDefaults.outlinedButtonBorder(enabled = true).copy(brush = SolidColor(semanticColors.statusRed))
                 ) {
                     Icon(imageVector = Icons.AutoMirrored.Filled.ExitToApp, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))

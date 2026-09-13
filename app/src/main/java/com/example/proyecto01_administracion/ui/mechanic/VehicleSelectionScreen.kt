@@ -26,12 +26,13 @@ fun VehicleSelectionScreen(
     onBack: () -> Unit,
     onVehicleSelected: (String) -> Unit
 ) {
+    val semanticColors = LocalTransAndinaColors.current
     var searchQuery by remember { mutableStateOf("") }
 
     val vehicles = listOf(
-        MechanicVehicleItem("ABC-123", "Toyota Hilux", "125,430 km", "Juan Pérez", StatusGreen),
-        MechanicVehicleItem("XYZ-456", "Isuzu NPR", "98,240 km", "María López", StatusYellow),
-        MechanicVehicleItem("DEF-789", "Ford Transit", "87,650 km", "Carlos Rodríguez", StatusRed)
+        MechanicVehicleItem("ABC-123", "Toyota Hilux", "125,430 km", "Juan Pérez", "Al día", semanticColors.statusGreen),
+        MechanicVehicleItem("XYZ-456", "Isuzu NPR", "98,240 km", "María López", "Próximo", semanticColors.statusYellow),
+        MechanicVehicleItem("DEF-789", "Ford Transit", "87,650 km", "Carlos Rodríguez", "Atrasado", semanticColors.statusRed)
     )
 
     val filteredVehicles = vehicles.filter { 
@@ -107,6 +108,7 @@ data class MechanicVehicleItem(
     val model: String,
     val mileage: String,
     val conductor: String,
+    val statusLabel: String,
     val statusColor: Color
 )
 
@@ -116,17 +118,35 @@ fun MechanicVehicleCard(vehicle: MechanicVehicleItem, onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
         border = CardDefaults.outlinedCardBorder()
     ) {
         Row(
-            modifier = Modifier.padding(20.dp),
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            VehicleSummary(model = vehicle.model, plate = vehicle.plate)
-            Box(modifier = Modifier.size(12.dp).background(vehicle.statusColor, CircleShape))
+            VehicleSummary(
+                model = vehicle.model, 
+                plate = vehicle.plate,
+                modelStyle = MaterialTheme.typography.titleMedium,
+                plateStyle = MaterialTheme.typography.labelMedium
+            )
+            
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Box(
+                    modifier = Modifier
+                        .size(8.dp)
+                        .background(vehicle.statusColor, CircleShape)
+                )
+                Text(
+                    text = vehicle.statusLabel,
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = vehicle.statusColor
+                )
+            }
         }
     }
 }

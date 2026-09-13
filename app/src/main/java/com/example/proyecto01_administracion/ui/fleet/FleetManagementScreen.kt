@@ -53,6 +53,8 @@ fun FleetManagementScreen(
         }
     }
 
+    val semanticColors = LocalTransAndinaColors.current
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -82,14 +84,35 @@ fun FleetManagementScreen(
         ) {
             Spacer(modifier = Modifier.height(16.dp))
             
-            // Summary Header
+            // Summary Cards Header
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                FleetStat(label = "Al día", count = "${allVehicles.count { it.status == "Al día" }}", color = StatusGreen)
-                FleetStat(label = "Próximos", count = "${allVehicles.count { it.status == "Próximo" }}", color = StatusYellow)
-                FleetStat(label = "Atrasados", count = "${allVehicles.count { it.status == "Atrasado" }}", color = StatusRed)
+                FleetSummaryCard(
+                    modifier = Modifier.weight(1f),
+                    label = "Al día",
+                    count = "${allVehicles.count { it.status == "Al día" }}",
+                    color = semanticColors.statusGreen,
+                    isSelected = selectedFilter == "Al día",
+                    onClick = { selectedFilter = if (selectedFilter == "Al día") "Todos" else "Al día" }
+                )
+                FleetSummaryCard(
+                    modifier = Modifier.weight(1f),
+                    label = "Próximos",
+                    count = "${allVehicles.count { it.status == "Próximo" }}",
+                    color = semanticColors.statusYellow,
+                    isSelected = selectedFilter == "Próximo",
+                    onClick = { selectedFilter = if (selectedFilter == "Próximo") "Todos" else "Próximo" }
+                )
+                FleetSummaryCard(
+                    modifier = Modifier.weight(1f),
+                    label = "Atrasados",
+                    count = "${allVehicles.count { it.status == "Atrasado" }}",
+                    color = semanticColors.statusRed,
+                    isSelected = selectedFilter == "Atrasado",
+                    onClick = { selectedFilter = if (selectedFilter == "Atrasado") "Todos" else "Atrasado" }
+                )
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -154,10 +177,50 @@ fun FleetManagementScreen(
 }
 
 @Composable
-fun FleetStat(label: String, count: String, color: Color) {
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        Box(modifier = Modifier.size(8.dp).background(color, CircleShape))
-        Text(text = "$label $count", color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.labelSmall)
+fun FleetSummaryCard(
+    modifier: Modifier = Modifier,
+    label: String,
+    count: String,
+    color: Color,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = modifier
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected) color.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surfaceVariant
+        ),
+        border = if (isSelected) BorderStroke(2.dp, color) else null
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Box(
+                    modifier = Modifier
+                        .size(8.dp)
+                        .background(color, CircleShape)
+                )
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1
+                )
+            }
+            Text(
+                text = count,
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.ExtraBold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
     }
 }
 
@@ -205,16 +268,24 @@ fun FleetVehicleCard(vehicle: FleetVehicleItem, onClick: () -> Unit) {
             
             Spacer(modifier = Modifier.height(12.dp))
             
+            val semanticColors = LocalTransAndinaColors.current
+            val displayColor = when(vehicle.statusColor) {
+                StatusGreen -> semanticColors.statusGreen
+                StatusYellow -> semanticColors.statusYellow
+                StatusRed -> semanticColors.statusRed
+                else -> vehicle.statusColor
+            }
+            
             Surface(
-                color = vehicle.statusColor.copy(alpha = 0.1f),
+                color = displayColor.copy(alpha = 0.1f),
                 shape = RoundedCornerShape(8.dp),
-                border = androidx.compose.foundation.BorderStroke(1.dp, vehicle.statusColor.copy(alpha = 0.5f))
+                border = BorderStroke(1.dp, displayColor.copy(alpha = 0.5f))
             ) {
                 Text(
                     text = vehicle.status,
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                    color = vehicle.statusColor,
-                    fontSize = 10.sp,
+                    color = displayColor,
+                    fontSize = 12.sp,
                     fontWeight = FontWeight.Bold
                 )
             }

@@ -9,11 +9,29 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+
+data class TransAndinaColors(
+    val statusGreen: Color,
+    val statusYellow: Color,
+    val statusRed: Color,
+    val statusBlue: Color
+)
+
+val LocalTransAndinaColors = staticCompositionLocalOf {
+    TransAndinaColors(
+        statusGreen = StatusGreen,
+        statusYellow = StatusYellow,
+        statusRed = StatusRed,
+        statusBlue = AccentBlue
+    )
+}
 
 private val DarkColorScheme = darkColorScheme(
     primary = AccentBlue,
@@ -64,6 +82,22 @@ fun Proyecto01AdministracionTheme(
         else -> LightColorScheme
     }
 
+    val transAndinaColors = if (darkTheme) {
+        TransAndinaColors(
+            statusGreen = StatusGreen,
+            statusYellow = StatusYellow,
+            statusRed = StatusRed,
+            statusBlue = AccentBlue
+        )
+    } else {
+        TransAndinaColors(
+            statusGreen = LightStatusGreen,
+            statusYellow = LightStatusYellow,
+            statusRed = LightStatusRed,
+            statusBlue = LightStatusBlue
+        )
+    }
+
     val view = LocalView.current
     if (!view.isInEditMode) {
         val window = (view.context as Activity).window
@@ -71,9 +105,11 @@ fun Proyecto01AdministracionTheme(
         WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        content = content
-    )
+    CompositionLocalProvider(LocalTransAndinaColors provides transAndinaColors) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = Typography,
+            content = content
+        )
+    }
 }

@@ -25,12 +25,13 @@ import com.example.proyecto01_administracion.ui.theme.*
 fun FleetAlertsScreen(
     onBack: () -> Unit
 ) {
+    val semanticColors = LocalTransAndinaColors.current
     val alerts = listOf(
-        FleetAlert("Urgente", "ABC-123: Cambio de frenos atrasado por 200 km", StatusRed),
-        FleetAlert("Urgente", "GHI-789: Revisión técnica vence mañana", StatusRed),
-        FleetAlert("Próxima", "DEF-456: Mantenimiento preventivo en 500 km", StatusYellow),
-        FleetAlert("Próxima", "JKL-012: Seguro vence en 15 días", StatusYellow),
-        FleetAlert("Informativa", "MNO-345: Nuevo registro de kilometraje", AccentBlue)
+        FleetAlert("Urgente", "ABC-123: Cambio de frenos atrasado por 200 km", semanticColors.statusRed),
+        FleetAlert("Urgente", "GHI-789: Revisión técnica vence mañana", semanticColors.statusRed),
+        FleetAlert("Próxima", "DEF-456: Mantenimiento preventivo en 500 km", semanticColors.statusYellow),
+        FleetAlert("Próxima", "JKL-012: Seguro vence en 15 días", semanticColors.statusYellow),
+        FleetAlert("Informativa", "MNO-345: Nuevo registro de kilometraje", semanticColors.statusBlue)
     )
 
     Scaffold(
@@ -73,6 +74,9 @@ data class FleetAlert(val type: String, val message: String, val color: Color)
 
 @Composable
 fun FleetAlertCard(alert: FleetAlert) {
+    val semanticColors = LocalTransAndinaColors.current
+    val color = alert.color
+    
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
@@ -87,18 +91,18 @@ fun FleetAlertCard(alert: FleetAlert) {
             Box(
                 modifier = Modifier
                     .size(40.dp)
-                    .background(alert.color.copy(alpha = 0.1f), CircleShape),
+                    .background(color.copy(alpha = 0.1f), CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = if (alert.color == StatusRed) Icons.Default.Warning else Icons.Default.Info,
+                    imageVector = if (color == semanticColors.statusRed) Icons.Default.Warning else Icons.Default.Info,
                     contentDescription = null,
-                    tint = alert.color,
+                    tint = color,
                     modifier = Modifier.size(24.dp)
                 )
             }
             Column {
-                Text(text = alert.type, color = alert.color, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                Text(text = alert.type, color = color, fontWeight = FontWeight.Bold, fontSize = 14.sp)
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(text = alert.message, color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyMedium, lineHeight = 20.sp)
             }

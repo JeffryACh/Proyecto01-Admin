@@ -39,11 +39,6 @@ fun ReportsScreen(
                         )
                     }
                 },
-                actions = {
-                    IconButton(onClick = { /* Filter */ }) {
-                        Icon(imageVector = Icons.Default.FilterList, contentDescription = "Filtrar", tint = MaterialTheme.colorScheme.onSurface)
-                    }
-                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background
                 )

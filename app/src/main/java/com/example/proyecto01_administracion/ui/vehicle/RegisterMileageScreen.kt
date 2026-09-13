@@ -23,6 +23,7 @@ fun RegisterMileageScreen(
     onBack: () -> Unit,
     onSuccess: () -> Unit = {}
 ) {
+    val semanticColors = LocalTransAndinaColors.current
     var mileage by remember { mutableStateOf("") }
     var date by remember { mutableStateOf("") } 
     var showConfirmation by remember { mutableStateOf(false) }
@@ -128,11 +129,11 @@ fun RegisterMileageScreen(
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                         unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                        focusedBorderColor = if (mileage.isNotEmpty() && !isMileageValid) StatusRed else AccentBlue,
-                        unfocusedBorderColor = if (mileage.isNotEmpty() && !isMileageValid) StatusRed else MaterialTheme.colorScheme.outline,
+                        focusedBorderColor = if (mileage.isNotEmpty() && !isMileageValid) semanticColors.statusRed else AccentBlue,
+                        unfocusedBorderColor = if (mileage.isNotEmpty() && !isMileageValid) semanticColors.statusRed else MaterialTheme.colorScheme.outline,
                         focusedTextColor = MaterialTheme.colorScheme.onSurface,
                         unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-                        focusedLabelColor = if (mileage.isNotEmpty() && !isMileageValid) StatusRed else AccentBlue,
+                        focusedLabelColor = if (mileage.isNotEmpty() && !isMileageValid) semanticColors.statusRed else AccentBlue,
                         unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 )
@@ -147,7 +148,7 @@ fun RegisterMileageScreen(
                     Text(
                         text = "El kilometraje debe ser mayor al último registro.",
                         style = MaterialTheme.typography.labelSmall,
-                        color = StatusRed
+                        color = semanticColors.statusRed
                     )
                 }
             }
