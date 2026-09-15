@@ -51,4 +51,12 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
+    // Dependencias para Pruebas Unitarias (src/test/)
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("io.mockk:mockk:1.13.8")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+    // Dependencias para Pruebas Instrumentadas de Compose (src/androidTest/)
+    androidTestImplementation("androidx.test.ext:junit:1.1.5")
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.5.0") // O la versión de Compose que use el proyecto
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
 }
