@@ -111,12 +111,11 @@ fun AlertsScreen(
                 Row(
                     modifier = Modifier
                         .padding(20.dp)
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                        .fillMaxWidth()
                 ) {
-                    AlertStat(count = "1", label = "Urgente", color = semanticColors.statusRed)
-                    AlertStat(count = "2", label = "Próxima", color = semanticColors.statusYellow)
-                    AlertStat(count = "2", label = "Info", color = semanticColors.statusBlue)
+                    AlertStat(modifier = Modifier.weight(1f), count = "1", label = "Urgente", color = semanticColors.statusRed)
+                    AlertStat(modifier = Modifier.weight(1f), count = "2", label = "Próxima", color = semanticColors.statusYellow)
+                    AlertStat(modifier = Modifier.weight(1f), count = "2", label = "Info", color = semanticColors.statusBlue)
                 }
             }
 
@@ -155,8 +154,11 @@ fun AlertsScreen(
 }
 
 @Composable
-fun AlertStat(count: String, label: String, color: Color) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+fun AlertStat(count: String, label: String, color: Color, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Text(count, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
         Text(label, style = MaterialTheme.typography.labelSmall, color = color)
     }

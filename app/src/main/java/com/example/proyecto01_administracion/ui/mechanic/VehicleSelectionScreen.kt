@@ -123,13 +123,16 @@ fun MechanicVehicleCard(vehicle: MechanicVehicleItem, onClick: () -> Unit) {
         border = CardDefaults.outlinedCardBorder()
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             VehicleSummary(
                 model = vehicle.model, 
                 plate = vehicle.plate,
+                modifier = Modifier.weight(1f),
                 modelStyle = MaterialTheme.typography.titleMedium,
                 plateStyle = MaterialTheme.typography.labelMedium
             )

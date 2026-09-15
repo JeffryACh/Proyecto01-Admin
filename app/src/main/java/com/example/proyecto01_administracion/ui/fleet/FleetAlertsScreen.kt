@@ -1,6 +1,7 @@
 package com.example.proyecto01_administracion.ui.fleet
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -11,13 +12,15 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.proyecto01_administracion.ui.dashboard.AlertFilterChip
+import com.example.proyecto01_administracion.ui.dashboard.AlertStat
 import com.example.proyecto01_administracion.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -26,13 +29,21 @@ fun FleetAlertsScreen(
     onBack: () -> Unit
 ) {
     val semanticColors = LocalTransAndinaColors.current
-    val alerts = listOf(
+    val allAlerts = listOf(
         FleetAlert("Urgente", "ABC-123: Cambio de frenos atrasado por 200 km", semanticColors.statusRed),
         FleetAlert("Urgente", "GHI-789: Revisión técnica vence mañana", semanticColors.statusRed),
         FleetAlert("Próxima", "DEF-456: Mantenimiento preventivo en 500 km", semanticColors.statusYellow),
         FleetAlert("Próxima", "JKL-012: Seguro vence en 15 días", semanticColors.statusYellow),
         FleetAlert("Informativa", "MNO-345: Nuevo registro de kilometraje", semanticColors.statusBlue)
     )
+
+    var selectedFilter by remember { mutableStateOf("Todas") }
+
+    val filteredAlerts = if (selectedFilter == "Todas") {
+        allAlerts
+    } else {
+        allAlerts.filter { it.type == selectedFilter.removeSuffix("s") }
+    }
 
     Scaffold(
         topBar = {
@@ -55,16 +66,66 @@ fun FleetAlertsScreen(
         containerColor = MaterialTheme.colorScheme.background,
         contentWindowInsets = WindowInsets(0.dp)
     ) { innerPadding ->
-        LazyColumn(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = PaddingValues(top = 16.dp, bottom = 32.dp)
+                .padding(horizontal = 24.dp)
         ) {
-            items(alerts) { alert ->
-                FleetAlertCard(alert = alert)
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Summary Card
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                border = CardDefaults.outlinedCardBorder()
+            ) {
+                Row(
+                    modifier = Modifier
+                        .padding(20.dp)
+                        .fillMaxWidth()
+                ) {
+                    AlertStat(
+                        modifier = Modifier.weight(1f),
+                        count = "${allAlerts.count { it.type == "Urgente" }}",
+                        label = "Urgente",
+                        color = semanticColors.statusRed
+                    )
+                    AlertStat(
+                        modifier = Modifier.weight(1f),
+                        count = "${allAlerts.count { it.type == "Próxima" }}",
+                        label = "Próxima",
+                        color = semanticColors.statusYellow
+                    )
+                    AlertStat(
+                        modifier = Modifier.weight(1f),
+                        count = "${allAlerts.count { it.type == "Informativa" }}",
+                        label = "Info",
+                        color = semanticColors.statusBlue
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Filters
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                AlertFilterChip(selected = selectedFilter == "Todas", label = "Todas", onClick = { selectedFilter = "Todas" })
+                AlertFilterChip(selected = selectedFilter == "Urgentes", label = "Urgentes", onClick = { selectedFilter = "Urgentes" })
+                AlertFilterChip(selected = selectedFilter == "Próximas", label = "Próximas", onClick = { selectedFilter = "Próximas" })
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            LazyColumn(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                contentPadding = PaddingValues(bottom = 32.dp)
+            ) {
+                items(filteredAlerts) { alert ->
+                    FleetAlertCard(alert = alert)
+                }
             }
         }
     }

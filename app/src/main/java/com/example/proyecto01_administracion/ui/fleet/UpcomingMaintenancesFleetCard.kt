@@ -11,7 +11,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.proyecto01_administracion.ui.dashboard.HistoryLink
 import com.example.proyecto01_administracion.ui.theme.*
 

@@ -9,12 +9,11 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.proyecto01_administracion.ui.fleet.FormTextField
 import com.example.proyecto01_administracion.ui.theme.*
+import com.example.proyecto01_administracion.ui.dashboard.AppChoiceChip
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -89,8 +88,8 @@ fun RegisterMaintenanceScreen(
 
             Text("Tipo de Mantenimiento", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                MaintenanceTypeChip(selected = type == "Preventivo", label = "Preventivo", onClick = { type = "Preventivo" })
-                MaintenanceTypeChip(selected = type == "Correctivo", label = "Correctivo", onClick = { type = "Correctivo" })
+                AppChoiceChip(selected = type == "Preventivo", label = "Preventivo", onClick = { type = "Preventivo" })
+                AppChoiceChip(selected = type == "Correctivo", label = "Correctivo", onClick = { type = "Correctivo" })
             }
 
             FormTextField(value = description, onValueChange = { description = it }, label = "Descripción de tareas", placeholder = "Ej: Cambio de aceite y filtros")
@@ -108,19 +107,4 @@ fun RegisterMaintenanceScreen(
             }
         }
     }
-}
-
-@Composable
-fun MaintenanceTypeChip(selected: Boolean, label: String, onClick: () -> Unit) {
-    FilterChip(
-        selected = selected,
-        onClick = onClick,
-        label = { Text(label) },
-        colors = FilterChipDefaults.filterChipColors(
-            selectedContainerColor = AccentBlue,
-            selectedLabelColor = Color.White,
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-            labelColor = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    )
 }

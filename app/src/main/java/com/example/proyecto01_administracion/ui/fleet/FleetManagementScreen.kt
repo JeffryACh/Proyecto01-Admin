@@ -21,8 +21,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.proyecto01_administracion.ui.dashboard.SectionHeader
 import com.example.proyecto01_administracion.ui.dashboard.VehicleSummary
+import com.example.proyecto01_administracion.ui.dashboard.AppFilterChip
 import com.example.proyecto01_administracion.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -143,10 +143,10 @@ fun FleetManagementScreen(
                     .horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                FilterChip(selected = selectedFilter == "Todos", label = "Todos", onClick = { selectedFilter = "Todos" })
-                FilterChip(selected = selectedFilter == "Al día", label = "Al día", onClick = { selectedFilter = "Al día" })
-                FilterChip(selected = selectedFilter == "Próximo", label = "Próximos", onClick = { selectedFilter = "Próximo" })
-                FilterChip(selected = selectedFilter == "Atrasado", label = "Atrasados", onClick = { selectedFilter = "Atrasado" })
+                AppFilterChip(selected = selectedFilter == "Todos", label = "Todos", onClick = { selectedFilter = "Todos" })
+                AppFilterChip(selected = selectedFilter == "Al día", label = "Al día", onClick = { selectedFilter = "Al día" })
+                AppFilterChip(selected = selectedFilter == "Próximo", label = "Próximos", onClick = { selectedFilter = "Próximo" })
+                AppFilterChip(selected = selectedFilter == "Atrasado", label = "Atrasados", onClick = { selectedFilter = "Atrasado" })
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -302,21 +302,3 @@ data class FleetVehicleItem(
     val status: String,
     val statusColor: Color
 )
-
-@Composable
-fun FilterChip(selected: Boolean, label: String, onClick: () -> Unit) {
-    Surface(
-        modifier = Modifier.clickable(onClick = onClick),
-        shape = RoundedCornerShape(20.dp),
-        color = if (selected) AccentBlue else MaterialTheme.colorScheme.surfaceVariant,
-        border = if (selected) null else BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
-    ) {
-        Text(
-            text = label,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-            color = if (selected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
-            style = MaterialTheme.typography.bodySmall,
-            fontWeight = FontWeight.Medium
-        )
-    }
-}

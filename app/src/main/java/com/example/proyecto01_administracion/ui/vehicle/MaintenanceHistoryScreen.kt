@@ -17,6 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.proyecto01_administracion.ui.dashboard.VehicleSummary
+import com.example.proyecto01_administracion.ui.dashboard.AppFilterChip
 import com.example.proyecto01_administracion.ui.theme.*
 
 data class MaintenanceRecord(
@@ -82,9 +83,9 @@ fun MaintenanceHistoryScreen(
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                FilterChip(selected = selectedFilter == "Todos", label = "Todos", onClick = { selectedFilter = "Todos" })
-                FilterChip(selected = selectedFilter == "Preventivo", label = "Preventivo", onClick = { selectedFilter = "Preventivo" })
-                FilterChip(selected = selectedFilter == "Correctivo", label = "Correctivo", onClick = { selectedFilter = "Correctivo" })
+                AppFilterChip(selected = selectedFilter == "Todos", label = "Todos", onClick = { selectedFilter = "Todos" })
+                AppFilterChip(selected = selectedFilter == "Preventivo", label = "Preventivo", onClick = { selectedFilter = "Preventivo" })
+                AppFilterChip(selected = selectedFilter == "Correctivo", label = "Correctivo", onClick = { selectedFilter = "Correctivo" })
             }
             
             Spacer(modifier = Modifier.height(16.dp))
@@ -115,24 +116,6 @@ fun MaintenanceHistoryScreen(
                 }
             }
         }
-    }
-}
-
-@Composable
-fun FilterChip(selected: Boolean, label: String, onClick: () -> Unit) {
-    Surface(
-        modifier = Modifier.clickable(onClick = onClick),
-        shape = RoundedCornerShape(20.dp),
-        color = if (selected) AccentBlue else MaterialTheme.colorScheme.surfaceVariant,
-        border = if (selected) null else BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
-    ) {
-        Text(
-            text = label,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-            color = if (selected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
-            style = MaterialTheme.typography.bodySmall,
-            fontWeight = FontWeight.Medium
-        )
     }
 }
 

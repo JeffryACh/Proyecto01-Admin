@@ -9,10 +9,10 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.proyecto01_administracion.ui.theme.*
+import com.example.proyecto01_administracion.ui.dashboard.AppChoiceChip
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -63,8 +63,8 @@ fun UserFormScreen(
             if (!isEdit) {
                 Text("Rol", style = MaterialTheme.typography.labelMedium, color = TextGrayLight)
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    RoleChip(selected = role == "Conductor", label = "Conductor", onClick = { role = "Conductor" })
-                    RoleChip(selected = role == "Mecánico", label = "Mecánico", onClick = { role = "Mecánico" })
+                    AppChoiceChip(selected = role == "Conductor", label = "Conductor", onClick = { role = "Conductor" })
+                    AppChoiceChip(selected = role == "Mecánico", label = "Mecánico", onClick = { role = "Mecánico" })
                 }
                 
                 FormTextField(value = password, onValueChange = { password = it }, label = "Contraseña", placeholder = "********")
@@ -115,21 +115,6 @@ fun FormTextField(
             focusedTextColor = MaterialTheme.colorScheme.onSurface,
             unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
             disabledTextColor = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    )
-}
-
-@Composable
-fun RoleChip(selected: Boolean, label: String, onClick: () -> Unit) {
-    FilterChip(
-        selected = selected,
-        onClick = onClick,
-        label = { Text(label) },
-        colors = FilterChipDefaults.filterChipColors(
-            selectedContainerColor = AccentBlue,
-            selectedLabelColor = Color.White,
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-            labelColor = MaterialTheme.colorScheme.onSurfaceVariant
         )
     )
 }

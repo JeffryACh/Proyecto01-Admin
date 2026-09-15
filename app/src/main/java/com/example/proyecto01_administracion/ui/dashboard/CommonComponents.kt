@@ -1,5 +1,6 @@
 package com.example.proyecto01_administracion.ui.dashboard
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -19,10 +20,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.proyecto01_administracion.ui.theme.*
 
-enum class VehicleStatus(val label: String, val color: Color) {
-    ON_TRACK("Al día", StatusGreen),
-    UPCOMING("Próximo mantenimiento", StatusYellow),
-    DELAYED("Mantenimiento atrasado", StatusRed)
+enum class VehicleStatus(val label: String) {
+    ON_TRACK("Al día"),
+    UPCOMING("Próximo mantenimiento"),
+    DELAYED("Mantenimiento atrasado")
 }
 
 @Composable
@@ -103,6 +104,49 @@ fun HistoryLink(
             modifier = Modifier.size(20.dp)
         )
     }
+}
+
+
+@Composable
+fun AppFilterChip(
+    selected: Boolean,
+    label: String,
+    onClick: () -> Unit
+) {
+    Surface(
+        modifier = Modifier.clickable(onClick = onClick),
+        shape = RoundedCornerShape(20.dp),
+        color = if (selected) AccentBlue else MaterialTheme.colorScheme.surfaceVariant,
+        border = if (selected) null else BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+    ) {
+        Text(
+            text = label,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            color = if (selected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.bodySmall,
+            fontWeight = FontWeight.Medium
+        )
+    }
+}
+
+
+@Composable
+fun AppChoiceChip(
+    selected: Boolean,
+    label: String,
+    onClick: () -> Unit
+) {
+    FilterChip(
+        selected = selected,
+        onClick = onClick,
+        label = { Text(label) },
+        colors = FilterChipDefaults.filterChipColors(
+            selectedContainerColor = AccentBlue,
+            selectedLabelColor = Color.White,
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            labelColor = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    )
 }
 
 @Composable

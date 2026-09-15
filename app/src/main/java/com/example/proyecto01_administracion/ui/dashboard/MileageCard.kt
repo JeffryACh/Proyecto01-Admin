@@ -5,11 +5,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.proyecto01_administracion.ui.theme.TextGrayLight
-import com.example.proyecto01_administracion.ui.theme.TextGrayMedium
 
 @Composable
 fun MileageCard(

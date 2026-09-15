@@ -15,7 +15,6 @@ import androidx.compose.ui.unit.sp
 import com.example.proyecto01_administracion.ui.theme.AccentBlue
 import com.example.proyecto01_administracion.ui.theme.StatusRed
 import com.example.proyecto01_administracion.ui.theme.StatusYellow
-import com.example.proyecto01_administracion.ui.theme.TextGrayLight
 
 @Composable
 fun AnnouncementsCard(

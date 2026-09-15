@@ -9,10 +9,10 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.proyecto01_administracion.ui.theme.*
+import com.example.proyecto01_administracion.ui.dashboard.AppChoiceChip
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,8 +66,8 @@ fun VehicleFormScreen(
             
             Text("Tipo de Vehículo", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                RoleChip(selected = type == "Liviano", label = "Liviano", onClick = { type = "Liviano" })
-                RoleChip(selected = type == "Pesado", label = "Pesado", onClick = { type = "Pesado" })
+                AppChoiceChip(selected = type == "Liviano", label = "Liviano", onClick = { type = "Liviano" })
+                AppChoiceChip(selected = type == "Pesado", label = "Pesado", onClick = { type = "Pesado" })
             }
 
             if (!isEdit) {

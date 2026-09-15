@@ -2,15 +2,6 @@ package com.example.proyecto01_administracion.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Default Colors
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
-
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
-
 // TransAndina Dark Theme Palette
 val BackgroundBlack = Color(0xFF080808)
 val CardGray = Color(0xFF151515)
@@ -28,7 +19,6 @@ val BorderGrayLight = Color(0xFFCED4DA)
 
 val TextBlack = Color(0xFF1A1A1A)
 val TextGrayDark = Color(0xFF495057)
-val TextGrayMuted = Color(0xFF868E96)
 
 val AccentBlue = Color(0xFF2196F3)
 val AccentBluePurple = Color(0xFF3F51B5)
