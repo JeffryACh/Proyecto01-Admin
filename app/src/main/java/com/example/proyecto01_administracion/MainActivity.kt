@@ -47,8 +47,6 @@ import com.example.proyecto01_administracion.ui.dashboard.MechanicBottomNavBar
 import com.example.proyecto01_administracion.ui.theme.Proyecto01AdministracionTheme
 import kotlinx.coroutines.launch
 
-enum class UserRole { DRIVER, MECHANIC, FLEET_MANAGER, NONE }
-
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

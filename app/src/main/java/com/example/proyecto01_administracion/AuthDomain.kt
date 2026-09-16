@@ -4,7 +4,8 @@ package com.example.proyecto01_administracion
 enum class UserRole {
     FLEET_MANAGER,
     MECHANIC,
-    DRIVER
+    DRIVER,
+    NONE
 }
 
 enum class AccountStatus {
@@ -24,4 +25,9 @@ data class User(
 // Interfaz que tanto Firebase como nuestro Fake deben respetar
 interface AuthRepository {
     fun signIn(email: String, password: String): Result<User>
+}
+
+interface MileageRepository {
+    fun getLatestOdometer(): Long?
+    fun register(odometerValue: Long): Result<Unit>
 }

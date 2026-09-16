@@ -9,7 +9,7 @@ class GenerateMaintenanceReportUseCaseTest {
     private val generateReport = GenerateMaintenanceReportUseCase()
 
     @Test
-    fun `suma unicamente los mantenimientos dentro del rango de fechas`() {
+    fun suma_unicamente_los_mantenimientos_dentro_del_rango_de_fechas() {
         // Arrange
         val records = listOf(
             MaintenanceRecord("1", LocalDate.of(2026, 8, 10), 50000.0), // Dentro del rango
@@ -29,7 +29,7 @@ class GenerateMaintenanceReportUseCaseTest {
     }
 
     @Test
-    fun `retorna cero si no hay mantenimientos en el rango`() {
+    fun retorna_cero_si_no_hay_mantenimientos_en_el_rango() {
         val records = listOf(
             MaintenanceRecord("1", LocalDate.of(2026, 4, 10), 50000.0)
         )

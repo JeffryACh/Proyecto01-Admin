@@ -1,7 +1,7 @@
 package com.example.proyecto01_administracion
 
 class RegisterMileageUseCase(
-    private val repository: FakeMileageRepository
+    private val repository: MileageRepository
 ) {
     operator fun invoke(newOdometer: Long): Result<Unit> {
         // Regla 1: No puede ser negativo

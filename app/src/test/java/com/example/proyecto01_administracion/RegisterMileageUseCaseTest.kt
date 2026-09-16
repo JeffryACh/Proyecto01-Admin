@@ -18,7 +18,7 @@ class RegisterMileageUseCaseTest {
     }
 
     @Test
-    fun `odometro negativo retorna fallo`() {
+    fun odometro_negativo_retorna_fallo() {
         val result = useCase(-50L)
 
         assertTrue(result.isFailure)
@@ -26,7 +26,7 @@ class RegisterMileageUseCaseTest {
     }
 
     @Test
-    fun `odometro menor al anterior retorna fallo`() {
+    fun odometro_menor_al_anterior_retorna_fallo() {
         // Arrange: Guardamos un kilometraje inicial de 10,000
         fakeRepository.register(10000L)
 
@@ -39,7 +39,7 @@ class RegisterMileageUseCaseTest {
     }
 
     @Test
-    fun `odometro correcto guarda el registro exitosamente`() {
+    fun odometro_correcto_guarda_el_registro_exitosamente() {
         fakeRepository.register(10000L)
 
         // Intentamos guardar 10,500 (un valor válido)
@@ -69,7 +69,7 @@ class SignInUseCaseTest {
     }
 
     @Test
-    fun `login exitoso retorna el usuario y su rol correcto`() {
+    fun login_exitoso_retorna_el_usuario_y_su_rol_correcto() {
         val result = signInUseCase("encargado@transandina.com", "123456")
 
         assertTrue(result.isSuccess)
@@ -77,7 +77,7 @@ class SignInUseCaseTest {
     }
 
     @Test
-    fun `login con contrasena incorrecta falla`() {
+    fun login_con_contrasena_incorrecta_falla() {
         val result = signInUseCase("encargado@transandina.com", "clave-equivocada")
 
         assertTrue(result.isFailure)
@@ -85,7 +85,7 @@ class SignInUseCaseTest {
     }
 
     @Test
-    fun `login de usuario suspendido bloquea el acceso`() {
+    fun login_de_usuario_suspendido_bloquea_el_acceso() {
         // Intentamos entrar con el conductor que está suspendido
         val result = signInUseCase("conductor@transandina.com", "clave123")
 
@@ -95,7 +95,7 @@ class SignInUseCaseTest {
     }
 
     @Test
-    fun `campos vacios son rechazados antes de consultar al repositorio`() {
+    fun campos_vacios_son_rechazados_antes_de_consultar_al_repositorio() {
         val result = signInUseCase("", "")
 
         assertTrue(result.isFailure)

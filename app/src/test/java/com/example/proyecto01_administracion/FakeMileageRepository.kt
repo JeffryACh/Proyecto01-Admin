@@ -1,15 +1,15 @@
 package com.example.proyecto01_administracion
 
-class FakeMileageRepository {
+class FakeMileageRepository : MileageRepository {
     private val records = mutableListOf<Long>()
 
     // Simula la base de datos devolviendo el último registro
-    fun getLatestOdometer(): Long? {
+    override fun getLatestOdometer(): Long? {
         return records.maxOrNull()
     }
 
     // Simula el guardado en la nube
-    fun register(odometerValue: Long): Result<Unit> {
+    override fun register(odometerValue: Long): Result<Unit> {
         records.add(odometerValue)
         return Result.success(Unit)
     }
