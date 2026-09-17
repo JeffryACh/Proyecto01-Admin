@@ -29,5 +29,14 @@ render.experimental.xml
 # Google Services (e.g. APIs or Firebase)
 google-services.json
 
+# Test del Firestore
+firebase.json
+TransAndinaApp.kt
+
 # Android Profiling
 *.hprof
+/.agents
+/.claude
+.firebaserc
+app/src/main/java/com/example/proyecto01_administracion/TransAndinaApp.kt
+app/src/main/java/com/example/proyecto01_administracion/TransAndinaApp.kt

@@ -35,6 +35,8 @@ android {
 }
 
 dependencies {
+    implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.firebase:firebase-auth")
     implementation(platform("com.google.firebase:firebase-bom:34.11.0"))
     implementation("com.google.firebase:firebase-analytics")
     androidTestImplementation(libs.firebase.auth)
