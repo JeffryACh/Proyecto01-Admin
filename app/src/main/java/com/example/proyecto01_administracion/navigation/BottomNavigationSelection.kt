@@ -1,6 +1,6 @@
 package com.example.proyecto01_administracion.navigation
 
-import com.example.proyecto01_administracion.UserRole
+import com.example.proyecto01_administracion.domain.model.UserRole
 
 fun getSelectedItemForRole(route: String?, role: UserRole): Int {
     return when (role) {

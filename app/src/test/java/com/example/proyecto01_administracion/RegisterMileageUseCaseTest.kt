@@ -1,9 +1,14 @@
 package com.example.proyecto01_administracion
 
+import com.example.proyecto01_administracion.domain.model.AccountStatus
+import com.example.proyecto01_administracion.domain.model.User
+import com.example.proyecto01_administracion.domain.model.UserRole
+import com.example.proyecto01_administracion.domain.usecase.SignInUseCase
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import kotlinx.coroutines.test.runTest
 
 class RegisterMileageUseCaseTest {
 
@@ -61,15 +66,27 @@ class SignInUseCaseTest {
 
         // Preparar la base de datos falsa con usuarios de prueba
         fakeAuthRepository.seedUser(
-            User("1", "encargado@transandina.com", "123456", UserRole.FLEET_MANAGER, AccountStatus.ACTIVE)
+            User(
+                "1",
+                "encargado@transandina.com",
+                UserRole.FLEET_MANAGER,
+                AccountStatus.ACTIVE
+            ),
+            password = "123456"
         )
         fakeAuthRepository.seedUser(
-            User("2", "conductor@transandina.com", "clave123", UserRole.DRIVER, AccountStatus.SUSPENDED)
+            User(
+                "2",
+                "conductor@transandina.com",
+                UserRole.DRIVER,
+                AccountStatus.SUSPENDED
+            ),
+            password = "clave123"
         )
     }
 
     @Test
-    fun login_exitoso_retorna_el_usuario_y_su_rol_correcto() {
+    fun login_exitoso_retorna_el_usuario_y_su_rol_correcto() = runTest {
         val result = signInUseCase("encargado@transandina.com", "123456")
 
         assertTrue(result.isSuccess)
@@ -77,7 +94,7 @@ class SignInUseCaseTest {
     }
 
     @Test
-    fun login_con_contrasena_incorrecta_falla() {
+    fun login_con_contrasena_incorrecta_falla() = runTest {
         val result = signInUseCase("encargado@transandina.com", "clave-equivocada")
 
         assertTrue(result.isFailure)
@@ -85,7 +102,7 @@ class SignInUseCaseTest {
     }
 
     @Test
-    fun login_de_usuario_suspendido_bloquea_el_acceso() {
+    fun login_de_usuario_suspendido_bloquea_el_acceso() = runTest {
         // Intentamos entrar con el conductor que está suspendido
         val result = signInUseCase("conductor@transandina.com", "clave123")
 
@@ -95,7 +112,7 @@ class SignInUseCaseTest {
     }
 
     @Test
-    fun campos_vacios_son_rechazados_antes_de_consultar_al_repositorio() {
+    fun campos_vacios_son_rechazados_antes_de_consultar_al_repositorio() = runTest {
         val result = signInUseCase("", "")
 
         assertTrue(result.isFailure)

@@ -1,5 +1,7 @@
 package com.example.proyecto01_administracion
 
+import com.example.proyecto01_administracion.domain.repository.MileageRepository
+
 class FakeMileageRepository : MileageRepository {
     private val records = mutableListOf<Long>()
 

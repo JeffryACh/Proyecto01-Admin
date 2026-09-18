@@ -3,7 +3,7 @@ package com.example.proyecto01_administracion.navigation
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
-import com.example.proyecto01_administracion.UserRole
+import com.example.proyecto01_administracion.domain.model.UserRole
 import com.example.proyecto01_administracion.ui.dashboard.AlertsScreen
 import com.example.proyecto01_administracion.ui.dashboard.SettingsScreen
 import com.example.proyecto01_administracion.ui.profile.EditProfileScreen

@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
-import com.example.proyecto01_administracion.UserRole
+import com.example.proyecto01_administracion.domain.model.UserRole
 
 @Composable
 fun AppNavigation(
