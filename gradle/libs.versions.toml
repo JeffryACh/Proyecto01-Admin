@@ -16,6 +16,7 @@ ksp = "2.3.10"
 hiltNavigationCompose = "1.2.0"
 lifecycleCompose = "2.8.7"
 coil = "2.6.0"
+camerax = "1.6.2"
 
 [libraries]
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
@@ -43,6 +44,11 @@ hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.r
 hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycleCompose" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
+androidx-camera-core = { group = "androidx.camera", name = "camera-core", version.ref = "camerax" }
+androidx-camera-camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "camerax" }
+androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "camerax" }
+androidx-camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "camerax" }
+androidx-camera-compose = { group = "androidx.camera", name = "camera-compose", version.ref = "camerax" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
