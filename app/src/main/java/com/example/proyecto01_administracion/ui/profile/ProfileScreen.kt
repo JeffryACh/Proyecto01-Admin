@@ -14,25 +14,32 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
+import com.example.proyecto01_administracion.ui.login.AuthViewModel
 import com.example.proyecto01_administracion.ui.theme.AccentBlue
 import com.example.proyecto01_administracion.ui.theme.LocalTransAndinaColors
-import com.example.proyecto01_administracion.ui.theme.StatusGreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
+    authViewModel: AuthViewModel = hiltViewModel(),
     onBack: () -> Unit,
     onNavigateToEditProfile: () -> Unit,
     onLogout: () -> Unit
 ) {
+    val currentUser by authViewModel.currentUser.collectAsStateWithLifecycle()
     val semanticColors = LocalTransAndinaColors.current
     
     Scaffold(
@@ -56,112 +63,137 @@ fun ProfileScreen(
         containerColor = MaterialTheme.colorScheme.background,
         contentWindowInsets = WindowInsets(0.dp)
     ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(horizontal = 24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            contentPadding = PaddingValues(bottom = 24.dp)
-        ) {
-            item {
-                Spacer(modifier = Modifier.height(24.dp))
-                
-                // Avatar
-                Box(
-                    modifier = Modifier
-                        .size(100.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.surfaceVariant),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Person,
-                        contentDescription = null,
-                        modifier = Modifier.size(60.dp),
-                        tint = AccentBlue
-                    )
-                }
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                Text(
-                    text = "Juan Pérez",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                
-                Text(
-                    text = "Conductor",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                
-                Spacer(modifier = Modifier.height(8.dp))
-                
-                Surface(
-                    shape = RoundedCornerShape(16.dp),
-                    color = StatusGreen.copy(alpha = 0.1f)
-                ) {
+        if (currentUser == null) {
+            Box(modifier = Modifier.fillMaxSize().padding(innerPadding), contentAlignment = Alignment.Center) {
+                Text("No hay sesión activa.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        } else {
+            val user = currentUser!!
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .padding(horizontal = 24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                contentPadding = PaddingValues(bottom = 24.dp)
+            ) {
+                item {
+                    Spacer(modifier = Modifier.height(24.dp))
+                    
+                    Box(
+                        modifier = Modifier
+                            .size(100.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.surfaceVariant),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (!user.foto_url.isNullOrBlank()) {
+                            AsyncImage(
+                                model = user.foto_url,
+                                contentDescription = "Foto de perfil de ${user.nombre}",
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.Person,
+                                contentDescription = null,
+                                modifier = Modifier.size(60.dp),
+                                tint = AccentBlue
+                            )
+                        }
+                    }
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
                     Text(
-                        text = "Activo",
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-                        color = StatusGreen,
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold
+                        text = user.nombre,
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    
+                    Text(
+                        text = when(user.rol_id) {
+                            "DRIVER" -> "Conductor"
+                            "MECHANIC" -> "Mecánico"
+                            "FLEET_MANAGER" -> "Encargado de flota"
+                            else -> user.rol_id
+                        },
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    val statusColor = if (user.estado == "Activo") semanticColors.statusGreen else semanticColors.statusRed
+                    Surface(
+                        shape = RoundedCornerShape(16.dp),
+                        color = statusColor.copy(alpha = 0.1f)
+                    ) {
+                        Text(
+                            text = user.estado,
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                            color = statusColor,
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    
+                    Spacer(modifier = Modifier.height(32.dp))
+                }
+                
+                item {
+                    ProfileInfoSection(
+                        title = "Información Personal",
+                        items = buildList {
+                            add(ProfileInfoItem("Cédula", user.cedula.ifBlank { "No registrada" }, Icons.Default.Badge))
+                            add(ProfileInfoItem("Correo", user.correo, Icons.Default.Email))
+                            add(ProfileInfoItem("Teléfono", user.telefono.ifBlank { "No registrado" }, Icons.Default.Phone))
+                        }
                     )
                 }
                 
-                Spacer(modifier = Modifier.height(32.dp))
-            }
-            
-            item {
-                ProfileInfoSection(
-                    title = "Información Personal",
-                    items = listOf(
-                        ProfileInfoItem("Cédula", "1-2345-6789", Icons.Default.Badge),
-                        ProfileInfoItem("Correo", "juan.perez@transandina.com", Icons.Default.Email),
-                        ProfileInfoItem("Teléfono", "+506 8888-8888", Icons.Default.Phone)
-                    )
-                )
-            }
-            
-            item {
-                Spacer(modifier = Modifier.height(24.dp))
-                ProfileInfoSection(
-                    title = "Licencia de Conducir",
-                    items = listOf(
-                        ProfileInfoItem("Tipo", "B1", Icons.Default.Badge),
-                        ProfileInfoItem("Vencimiento", "15/10/2026", Icons.Default.Badge)
-                    )
-                )
-            }
-            
-            item {
-                Spacer(modifier = Modifier.height(48.dp))
-                
-                Button(
-                    onClick = onNavigateToEditProfile,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = AccentBlue)
-                ) {
-                    Text("Editar Perfil", fontWeight = FontWeight.Bold)
+                if (user.rol_id == "DRIVER") {
+                    item {
+                        Spacer(modifier = Modifier.height(24.dp))
+                        ProfileInfoSection(
+                            title = "Licencia de Conducir",
+                            items = listOf(
+                                ProfileInfoItem("Número", user.numero_licencia ?: "No registrada", Icons.Default.Badge)
+                            )
+                        )
+                    }
                 }
                 
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                OutlinedButton(
-                    onClick = onLogout,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = semanticColors.statusRed),
-                    border = ButtonDefaults.outlinedButtonBorder(enabled = true).copy(brush = SolidColor(semanticColors.statusRed))
-                ) {
-                    Icon(imageVector = Icons.AutoMirrored.Filled.ExitToApp, contentDescription = null)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Cerrar Sesión", fontWeight = FontWeight.Bold)
+                item {
+                    Spacer(modifier = Modifier.height(48.dp))
+                    
+                    Button(
+                        onClick = onNavigateToEditProfile,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = AccentBlue)
+                    ) {
+                        Text("Editar Perfil", fontWeight = FontWeight.Bold)
+                    }
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    OutlinedButton(
+                        onClick = {
+                            authViewModel.logout()
+                            onLogout()
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = semanticColors.statusRed),
+                        border = ButtonDefaults.outlinedButtonBorder(enabled = true).copy(brush = SolidColor(semanticColors.statusRed))
+                    ) {
+                        Icon(imageVector = Icons.AutoMirrored.Filled.ExitToApp, contentDescription = null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Cerrar Sesión", fontWeight = FontWeight.Bold)
+                    }
                 }
             }
         }

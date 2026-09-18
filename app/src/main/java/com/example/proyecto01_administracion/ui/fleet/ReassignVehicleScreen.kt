@@ -16,28 +16,30 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.proyecto01_administracion.domain.models.Vehicle
 import com.example.proyecto01_administracion.ui.theme.*
-
-data class ReassignVehicleItem(
-    val plate: String,
-    val model: String,
-    val status: String,
-    val color: Color
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReassignVehicleScreen(
     userId: String,
+    viewModel: AssignmentViewModel = hiltViewModel(),
     onBack: () -> Unit,
-    onConfirm: () -> Unit
+    onSuccess: () -> Unit
 ) {
-    var selectedVehicle by remember { mutableStateOf("ABC-123") }
-    val vehicles = listOf(
-        ReassignVehicleItem("ABC-123", "Toyota Hilux", "Asignado actualmente", StatusGreen),
-        ReassignVehicleItem("XYZ-456", "Isuzu NPR", "Disponible", StatusGreen),
-        ReassignVehicleItem("DEF-789", "Ford Transit", "Disponible", StatusGreen)
-    )
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(userId) {
+        viewModel.loadData(userId) 
+    }
+
+    LaunchedEffect(uiState.isSuccess) {
+        if (uiState.isSuccess) {
+            onSuccess()
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -67,13 +69,12 @@ fun ReassignVehicleScreen(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                border = CardDefaults.outlinedCardBorder()
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 Column(modifier = Modifier.padding(20.dp)) {
                     Text("Conductor", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text("Juan Pérez", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                    Text("juan.perez@transandina.com", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(uiState.user?.nombre ?: if (uiState.isLoading) "Cargando…" else "No registrado", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                    Text(uiState.user?.correo ?: if (uiState.isLoading) "" else "No registrado", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
 
@@ -81,36 +82,53 @@ fun ReassignVehicleScreen(
 
             Text("Seleccionar nuevo vehículo", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
 
-            LazyColumn(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                contentPadding = PaddingValues(vertical = 16.dp)
-            ) {
-                items(vehicles) { vehicle ->
-                    VehicleOptionItem(
-                        vehicle = vehicle,
-                        isSelected = selectedVehicle == vehicle.plate,
-                        onClick = { selectedVehicle = vehicle.plate }
-                    )
+            if (uiState.isLoading) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 32.dp))
+            } else if (uiState.error != null) {
+                Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    Text(uiState.error!!, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.error)
+                }
+            } else if (uiState.vehicles.isEmpty()) {
+                Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    Text("No hay vehículos disponibles.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(vertical = 16.dp)
+                ) {
+                    items(uiState.vehicles) { vehicle ->
+                        VehicleOptionItem(
+                            vehicle = vehicle,
+                            isSelected = uiState.selectedVehicleId == vehicle.id,
+                            onClick = { viewModel.onVehicleSelected(vehicle.id) }
+                        )
+                    }
                 }
             }
 
             Button(
-                onClick = onConfirm,
+                onClick = viewModel::reassign,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp)
                     .padding(bottom = 16.dp),
+                enabled = !uiState.isLoading && uiState.selectedVehicleId.isNotBlank(),
                 shape = RoundedCornerShape(16.dp)
             ) {
-                Text("Confirmar reasignación", fontWeight = FontWeight.Bold)
+                if (uiState.isLoading) {
+                    CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+                } else {
+                    Text("Confirmar reasignación", fontWeight = FontWeight.Bold)
+                }
             }
         }
     }
 }
 
 @Composable
-fun VehicleOptionItem(vehicle: ReassignVehicleItem, isSelected: Boolean, onClick: () -> Unit) {
+fun VehicleOptionItem(vehicle: Vehicle, isSelected: Boolean, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -128,9 +146,8 @@ fun VehicleOptionItem(vehicle: ReassignVehicleItem, isSelected: Boolean, onClick
         ) {
             Icon(Icons.Default.DirectionsCar, contentDescription = null, tint = if (isSelected) AccentBlue else MaterialTheme.colorScheme.onSurfaceVariant)
             Column(modifier = Modifier.weight(1f)) {
-                Text(text = vehicle.model, color = MaterialTheme.colorScheme.onSurface, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal)
-                Text(text = vehicle.plate, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
-                Text(text = vehicle.status, color = if (vehicle.status == "Asignado actualmente") AccentBlue else StatusGreen, style = MaterialTheme.typography.labelSmall)
+                Text(text = "${vehicle.marca} ${vehicle.modelo}", color = MaterialTheme.colorScheme.onSurface, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal)
+                Text(text = vehicle.placa, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
             }
             RadioButton(selected = isSelected, onClick = onClick, colors = RadioButtonDefaults.colors(selectedColor = AccentBlue))
         }

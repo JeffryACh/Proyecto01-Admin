@@ -51,4 +51,28 @@ interface VehicleAssignmentDao {
         status: SyncStatus,
         updatedAt: Long = System.currentTimeMillis()
     )
+
+    @Query("""
+        UPDATE vehicle_assignments
+        SET endDate = :endDate, syncStatus = :syncStatus, updatedAt = :updatedAt
+        WHERE vehicleId = :vehicleId AND endDate IS NULL
+    """)
+    suspend fun closeActiveByVehicle(
+        vehicleId: String,
+        endDate: Long = System.currentTimeMillis(),
+        syncStatus: SyncStatus = SyncStatus.PENDING,
+        updatedAt: Long = System.currentTimeMillis()
+    )
+
+    @Query("""
+        UPDATE vehicle_assignments
+        SET endDate = :endDate, syncStatus = :syncStatus, updatedAt = :updatedAt
+        WHERE userId = :userId AND endDate IS NULL
+    """)
+    suspend fun closeActiveByUser(
+        userId: String,
+        endDate: Long = System.currentTimeMillis(),
+        syncStatus: SyncStatus = SyncStatus.PENDING,
+        updatedAt: Long = System.currentTimeMillis()
+    )
 }

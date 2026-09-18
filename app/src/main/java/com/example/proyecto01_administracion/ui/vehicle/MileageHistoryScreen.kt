@@ -8,7 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -16,32 +16,25 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.proyecto01_administracion.domain.models.MileageRecord
 import com.example.proyecto01_administracion.ui.dashboard.VehicleSummary
 import com.example.proyecto01_administracion.ui.theme.*
-import java.util.Locale
-
-data class MileageRecord(
-    val date: String,
-    val mileage: Int,
-    val difference: Int? = null
-)
+import java.text.SimpleDateFormat
+import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MileageHistoryScreen(
+    viewModel: MileageViewModel = hiltViewModel(),
     onBack: () -> Unit
 ) {
-    val records = listOf(
-        MileageRecord("25 Ago 2026", 125430, 2430),
-        MileageRecord("15 Ago 2026", 123000, 2100),
-        MileageRecord("01 Ago 2026", 120900, 1850),
-        MileageRecord("15 Jul 2026", 116800, 2300),
-        MileageRecord("01 Jul 2026", 114500, 2700),
-        MileageRecord("15 Jun 2026", 111800, 1800),
-        MileageRecord("01 Jun 2026", 110000, null)
-    )
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val dateFormat = remember { SimpleDateFormat("dd MMM yyyy", Locale.getDefault()) }
 
     Scaffold(
         topBar = {
@@ -62,66 +55,86 @@ fun MileageHistoryScreen(
         containerColor = MaterialTheme.colorScheme.background,
         contentWindowInsets = WindowInsets(0.dp)
     ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(horizontal = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp),
-            contentPadding = PaddingValues(top = 16.dp, bottom = 24.dp)
-        ) {
-            item {
-                VehicleSummary(model = "Toyota Hilux", plate = "ABC-123")
+        if (uiState.isLoading) {
+            Box(modifier = Modifier.fillMaxSize().padding(innerPadding), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
             }
+        } else if (uiState.error != null) {
+            Box(modifier = Modifier.fillMaxSize().padding(innerPadding), contentAlignment = Alignment.Center) {
+                Text(uiState.error!!, color = MaterialTheme.colorScheme.error)
+            }
+        } else if (uiState.history.isEmpty()) {
+            Box(modifier = Modifier.fillMaxSize().padding(innerPadding), contentAlignment = Alignment.Center) {
+                Text(
+                    text = "Aún no hay registros de kilometraje.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .padding(horizontal = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(20.dp),
+                contentPadding = PaddingValues(top = 16.dp, bottom = 24.dp)
+            ) {
+                item {
+                    uiState.vehicle?.let { vehicle ->
+                        VehicleSummary(model = "${vehicle.marca} ${vehicle.modelo}", plate = vehicle.placa)
+                    }
+                }
 
-            item {
-                // Summary and Chart Card
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                    border = CardDefaults.outlinedCardBorder()
-                ) {
-                    Column(modifier = Modifier.padding(20.dp)) {
-                        Text("Kilometraje actual", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text("125,430 km", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                        Text("Último registro: 25 Ago 2026 · Registros: 7", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        
-                        Spacer(modifier = Modifier.height(24.dp))
-                        
-                        // Simple Chart
-                        MileageLineChart(
-                            records = records.reversed(),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(150.dp)
-                        )
-                        
-                        Spacer(modifier = Modifier.height(8.dp))
-                        
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text("Jun", style = MaterialTheme.typography.labelSmall, color = TextGrayMedium)
-                            Text("Jul", style = MaterialTheme.typography.labelSmall, color = TextGrayMedium)
-                            Text("Ago", style = MaterialTheme.typography.labelSmall, color = TextGrayMedium)
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(20.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                    ) {
+                        Column(modifier = Modifier.padding(20.dp)) {
+                            Text("Kilometraje actual", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("${uiState.vehicle?.kilometraje_actual ?: 0} km", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                            
+                            val lastDate = uiState.history.firstOrNull()?.fecha?.toDate()?.let { dateFormat.format(it) } ?: "N/A"
+                            Text("Último registro: $lastDate · Registros: ${uiState.history.size}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            
+                            Spacer(modifier = Modifier.height(24.dp))
+                            
+                            if (uiState.history.size >= 2) {
+                                MileageLineChart(
+                                    records = uiState.history.reversed(),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(150.dp)
+                                )
+                            } else {
+                                Box(modifier = Modifier.fillMaxWidth().height(150.dp), contentAlignment = Alignment.Center) {
+                                    Text("Datos insuficientes para la gráfica", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                            }
                         }
                     }
                 }
-            }
 
-            item {
-                Text(
-                    text = "Registros",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            }
+                item {
+                    Text(
+                        text = "Registros Recientes",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
 
-            itemsIndexed(records) { _, record ->
-                MileageItem(record = record)
+                itemsIndexed(uiState.history) { index, record ->
+                    val nextRecord = if (index + 1 < uiState.history.size) uiState.history[index + 1] else null
+                    val diff = nextRecord?.let { record.kilometraje - it.kilometraje }
+                    MileageItem(
+                        date = dateFormat.format(record.fecha.toDate()),
+                        mileage = record.kilometraje,
+                        difference = diff
+                    )
+                }
             }
         }
     }
@@ -133,17 +146,16 @@ fun MileageLineChart(
     modifier: Modifier = Modifier
 ) {
     val accentColor = AccentBlue
-    val gridColor = CardBorderGray
+    val gridColor = MaterialTheme.colorScheme.outlineVariant
     
     Canvas(modifier = modifier) {
         val width = size.width
         val height = size.height
         
-        val minMileage = 110000f
-        val maxMileage = 126000f
-        val range = maxMileage - minMileage
+        val minMileage = records.minOf { it.kilometraje }.toFloat()
+        val maxMileage = records.maxOf { it.kilometraje }.toFloat()
+        val range = (maxMileage - minMileage).coerceAtLeast(1f)
         
-        // Draw grid lines
         for (i in 0..3) {
             val y = height - (i * height / 3)
             drawLine(
@@ -154,11 +166,9 @@ fun MileageLineChart(
             )
         }
         
-        if (records.size < 2) return@Canvas
-        
         val points = records.mapIndexed { index, record ->
-            val x = index * width / (records.size - 1)
-            val y = height - ((record.mileage - minMileage) / range * height)
+            val x = if (records.size > 1) index * width / (records.size - 1) else width / 2
+            val y = height - ((record.kilometraje - minMileage) / range * height)
             Offset(x, y)
         }
         
@@ -191,12 +201,11 @@ fun MileageLineChart(
 }
 
 @Composable
-fun MileageItem(record: MileageRecord) {
+fun MileageItem(date: String, mileage: Long, difference: Long? = null) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-        border = CardDefaults.outlinedCardBorder()
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
         Row(
             modifier = Modifier
@@ -206,17 +215,17 @@ fun MileageItem(record: MileageRecord) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column {
-                Text(record.date, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Text("${String.format(Locale.US, "%,d", record.mileage)} km", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                Text(date, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("${String.format(Locale.US, "%,d", mileage)} km", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
             }
             
-            if (record.difference != null) {
+            if (difference != null) {
                 Surface(
                     color = AccentBlue.copy(alpha = 0.1f),
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(
-                        text = "+${String.format(Locale.US, "%,d", record.difference)} km",
+                        text = "+${String.format(Locale.US, "%,d", difference)} km",
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                         color = AccentBlue,
                         fontSize = 12.sp,

@@ -14,38 +14,37 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.proyecto01_administracion.domain.models.Maintenance
 import com.example.proyecto01_administracion.ui.dashboard.VehicleSummary
 import com.example.proyecto01_administracion.ui.dashboard.AppFilterChip
 import com.example.proyecto01_administracion.ui.theme.*
-
-data class MaintenanceRecord(
-    val title: String,
-    val type: String,
-    val date: String,
-    val mileage: String,
-    val cost: String
-)
+import java.text.SimpleDateFormat
+import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MaintenanceHistoryScreen(
+    vehicleId: String? = null,
+    viewModel: MaintenanceHistoryViewModel = hiltViewModel(),
     onBack: () -> Unit,
-    onNavigateToDetail: (MaintenanceRecord) -> Unit = {}
+    onNavigateToDetail: (Maintenance) -> Unit = {}
 ) {
-    val maintenanceRecords = listOf(
-        MaintenanceRecord("Cambio de aceite", "Preventivo", "10 Ago 2026", "120,000 km", "₡45.000"),
-        MaintenanceRecord("Cambio de pastillas de freno", "Correctivo", "25 Jul 2026", "118,500 km", "₡85.000"),
-        MaintenanceRecord("Revisión general", "Preventivo", "10 Jun 2026", "115,000 km", "₡30.000")
-    )
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val dateFormat = remember { SimpleDateFormat("dd MMM yyyy", Locale.getDefault()) }
 
-    var selectedFilter by remember { mutableStateOf("Todos") }
+    LaunchedEffect(vehicleId) {
+        viewModel.loadData(vehicleId)
+    }
 
-    val filteredRecords = if (selectedFilter == "Todos") {
-        maintenanceRecords
+    val filteredRecords = if (uiState.filter == "Todos") {
+        uiState.maintenanceRecords
     } else {
-        maintenanceRecords.filter { it.type == selectedFilter }
+        uiState.maintenanceRecords.filter { it.tipo == uiState.filter }
     }
 
     Scaffold(
@@ -75,34 +74,33 @@ fun MaintenanceHistoryScreen(
         ) {
             Spacer(modifier = Modifier.height(16.dp))
             
-            VehicleSummary(model = "Toyota Hilux", plate = "ABC-123")
+            uiState.vehicle?.let { vehicle ->
+                VehicleSummary(model = "${vehicle.marca} ${vehicle.modelo}", plate = vehicle.placa)
+            }
             
             Spacer(modifier = Modifier.height(24.dp))
             
-            // Filters
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                AppFilterChip(selected = selectedFilter == "Todos", label = "Todos", onClick = { selectedFilter = "Todos" })
-                AppFilterChip(selected = selectedFilter == "Preventivo", label = "Preventivo", onClick = { selectedFilter = "Preventivo" })
-                AppFilterChip(selected = selectedFilter == "Correctivo", label = "Correctivo", onClick = { selectedFilter = "Correctivo" })
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                AppFilterChip(selected = uiState.filter == "Todos", label = "Todos", onClick = { viewModel.onFilterChange("Todos") })
+                AppFilterChip(selected = uiState.filter == "Preventivo", label = "Preventivo", onClick = { viewModel.onFilterChange("Preventivo") })
+                AppFilterChip(selected = uiState.filter == "Correctivo", label = "Correctivo", onClick = { viewModel.onFilterChange("Correctivo") })
             }
             
             Spacer(modifier = Modifier.height(16.dp))
-            
-            Text(
-                text = "Últimos 12 meses",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            
-            Spacer(modifier = Modifier.height(16.dp))
 
-            if (filteredRecords.isEmpty()) {
+            if (uiState.isLoading) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            } else if (uiState.error != null) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(uiState.error!!, color = MaterialTheme.colorScheme.error, textAlign = TextAlign.Center)
+                }
+            } else if (filteredRecords.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("No hay mantenimientos registrados", color = Color.White, fontWeight = FontWeight.Bold)
-                        Text("Los mantenimientos realizados aparecerán aquí.", color = TextGrayLight, fontSize = 14.sp)
+                        Text("No hay mantenimientos registrados", color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
+                        Text("Los mantenimientos realizados aparecerán aquí.", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp, textAlign = TextAlign.Center)
                     }
                 }
             } else {
@@ -111,7 +109,11 @@ fun MaintenanceHistoryScreen(
                     contentPadding = PaddingValues(bottom = 24.dp)
                 ) {
                     items(filteredRecords) { record ->
-                        MaintenanceItemCard(record = record, onClick = { onNavigateToDetail(record) })
+                        MaintenanceItemCard(
+                            record = record, 
+                            dateLabel = dateFormat.format(record.fecha.toDate()),
+                            onClick = { onNavigateToDetail(record) }
+                        )
                     }
                 }
             }
@@ -120,7 +122,7 @@ fun MaintenanceHistoryScreen(
 }
 
 @Composable
-fun MaintenanceItemCard(record: MaintenanceRecord, onClick: () -> Unit) {
+fun MaintenanceItemCard(record: Maintenance, dateLabel: String, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -135,13 +137,13 @@ fun MaintenanceItemCard(record: MaintenanceRecord, onClick: () -> Unit) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = record.title, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                StatusTag(type = record.type)
+                Text(text = record.taller, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                StatusTag(type = record.tipo)
             }
             
             Spacer(modifier = Modifier.height(8.dp))
             
-            Text(text = "Toyota Hilux · ABC-123", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(text = record.descripcion, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2)
             
             Spacer(modifier = Modifier.height(12.dp))
             
@@ -150,11 +152,11 @@ fun MaintenanceItemCard(record: MaintenanceRecord, onClick: () -> Unit) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Column {
-                    Text(text = record.date, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text(text = record.mileage, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(text = dateLabel, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(text = "${record.kilometraje} km", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 Text(
-                    text = record.cost,
+                    text = "₡${String.format(Locale.US, "%,.2f", record.costo)}",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,

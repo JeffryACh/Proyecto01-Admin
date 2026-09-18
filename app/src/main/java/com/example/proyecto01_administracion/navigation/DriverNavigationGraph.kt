@@ -25,7 +25,7 @@ fun NavGraphBuilder.driverNavigationGraph(
             onBack = { navController.popBackStack() },
             onNavigateToRegisterMileage = { navController.navigate(AppRoutes.REGISTER_MILEAGE) },
             onNavigateToMileageHistory = { navController.navigate(AppRoutes.MILEAGE_HISTORY) },
-            onNavigateToDocuments = { navController.navigate(AppRoutes.VEHICLE_DOCUMENTS) },
+            onNavigateToDocuments = { plate -> navController.navigate(AppRoutes.vehicleDocuments(plate)) },
             onNavigateToMaintenanceHistory = { navController.navigate(AppRoutes.MAINTENANCE_HISTORY) }
         )
     }

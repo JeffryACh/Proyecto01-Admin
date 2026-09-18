@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -18,13 +19,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.proyecto01_administracion.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReportsScreen(
+    viewModel: ReportViewModel = hiltViewModel(),
     onBack: () -> Unit
 ) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -46,56 +52,74 @@ fun ReportsScreen(
         containerColor = MaterialTheme.colorScheme.background,
         contentWindowInsets = WindowInsets(0.dp)
     ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(horizontal = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp),
-            contentPadding = PaddingValues(top = 16.dp, bottom = 32.dp)
-        ) {
-            item {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                    border = CardDefaults.outlinedCardBorder()
-                ) {
-                    Column(modifier = Modifier.padding(20.dp)) {
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Icon(Icons.Default.DateRange, contentDescription = null, tint = AccentBlue, modifier = Modifier.size(20.dp))
-                            Text(text = "Últimos 30 días", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
+        if (uiState.isLoading) {
+            Box(modifier = Modifier.fillMaxSize().padding(innerPadding), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        } else if (uiState.error != null) {
+            Box(modifier = Modifier.fillMaxSize().padding(innerPadding), contentAlignment = Alignment.Center) {
+                Text(uiState.error!!, color = MaterialTheme.colorScheme.error)
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .padding(horizontal = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(24.dp),
+                contentPadding = PaddingValues(top = 16.dp, bottom = 32.dp)
+            ) {
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(20.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                        border = CardDefaults.outlinedCardBorder()
+                    ) {
+                        Column(modifier = Modifier.padding(20.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Icon(Icons.Default.DateRange, contentDescription = null, tint = AccentBlue, modifier = Modifier.size(20.dp))
+                                Text(text = "Últimos 30 días", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
+                            }
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(text = "Costo Total Mantenimiento", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
+                            Text(text = "₡${uiState.totalCost}", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                         }
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(text = "Costo Total Mantenimiento", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
-                        Text(text = "$4,250.00", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                     }
                 }
-            }
-            
-            item {
-                Text(text = "Distribución por Tipo", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                Spacer(modifier = Modifier.height(16.dp))
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    ReportBar(label = "Preventivo", value = 65, color = AccentBlue)
-                    ReportBar(label = "Correctivo", value = 25, color = StatusRed)
-                    ReportBar(label = "Predictivo", value = 10, color = StatusGreen)
+                
+                item {
+                    Text(text = "Distribución por Tipo", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        ReportBar(label = "Preventivo", value = uiState.preventivoPercent, color = AccentBlue)
+                        ReportBar(label = "Correctivo", value = uiState.correctivoPercent, color = StatusRed)
+                        ReportBar(label = "Predictivo", value = uiState.predictivoPercent, color = StatusGreen)
+                    }
                 }
-            }
-            
-            item {
-                Text(text = "Top Vehículos por Gasto", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                Spacer(modifier = Modifier.height(16.dp))
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                    border = CardDefaults.outlinedCardBorder()
-                ) {
-                    Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        VehicleExpenseItem(plate = "GHI-789", amount = "$1,200")
-                        VehicleExpenseItem(plate = "ABC-123", amount = "$850")
-                        VehicleExpenseItem(plate = "DEF-456", amount = "$420")
+                
+                if (uiState.topVehicles.isNotEmpty()) {
+                    item {
+                        Text(text = "Top Vehículos por Gasto", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(20.dp),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                            border = CardDefaults.outlinedCardBorder()
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                                uiState.topVehicles.forEach { item ->
+                                    VehicleExpenseItem(plate = item.plate, amount = item.amount)
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    item {
+                        Box(modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp), contentAlignment = Alignment.Center) {
+                            Text("No hay suficientes datos para generar el top.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
                     }
                 }
             }

@@ -85,4 +85,7 @@ interface MaintenanceDao {
         startDate: Long,
         endDate: Long
     ): Double?
+
+    @Query("SELECT * FROM maintenances ORDER BY date DESC")
+    fun observeAll(): Flow<List<MaintenanceEntity>>
 }

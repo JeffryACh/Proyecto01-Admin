@@ -6,16 +6,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.proyecto01_administracion.ui.dashboard.FleetManagerDashboardScreen
-import com.example.proyecto01_administracion.ui.fleet.FleetAlertsScreen
-import com.example.proyecto01_administracion.ui.fleet.FleetManagementScreen
-import com.example.proyecto01_administracion.ui.fleet.FleetVehicleDetailScreen
-import com.example.proyecto01_administracion.ui.fleet.ReassignDriverScreen
-import com.example.proyecto01_administracion.ui.fleet.ReassignVehicleScreen
-import com.example.proyecto01_administracion.ui.fleet.ReportsScreen
-import com.example.proyecto01_administracion.ui.fleet.UserDetailScreen
-import com.example.proyecto01_administracion.ui.fleet.UserFormScreen
-import com.example.proyecto01_administracion.ui.fleet.UserManagementScreen
-import com.example.proyecto01_administracion.ui.fleet.VehicleFormScreen
+import com.example.proyecto01_administracion.ui.fleet.*
 
 fun NavGraphBuilder.fleetManagerNavigationGraph(
     navController: NavHostController,
@@ -50,10 +41,11 @@ fun NavGraphBuilder.fleetManagerNavigationGraph(
             plate = plate,
             onBack = { navController.popBackStack() },
             onEdit = { navController.navigate(AppRoutes.vehicleForm(plate)) },
+            onRegisterMaintenance = { navController.navigate(AppRoutes.registerMaintenance(it)) },
             onNavigateToMaintenanceHistory = { navController.navigate(AppRoutes.MAINTENANCE_HISTORY) },
             onNavigateToMileageHistory = { navController.navigate(AppRoutes.MILEAGE_HISTORY) },
             onReassignDriver = { navController.navigate(AppRoutes.reassignDriver(plate)) },
-            onNavigateToDocuments = { navController.navigate(AppRoutes.VEHICLE_DOCUMENTS) }
+            onNavigateToDocuments = { navController.navigate(AppRoutes.vehicleDocuments(plate)) }
         )
     }
 
@@ -65,7 +57,7 @@ fun NavGraphBuilder.fleetManagerNavigationGraph(
         ReassignDriverScreen(
             plate = plate,
             onBack = { navController.popBackStack() },
-            onConfirm = { navController.popBackStack() }
+            onSuccess = { navController.popBackStack() }
         )
     }
 
@@ -83,7 +75,7 @@ fun NavGraphBuilder.fleetManagerNavigationGraph(
         VehicleFormScreen(
             plate = plate,
             onBack = { navController.popBackStack() },
-            onSave = { navController.popBackStack() }
+            onSuccess = { navController.popBackStack() }
         )
     }
 
@@ -100,7 +92,7 @@ fun NavGraphBuilder.fleetManagerNavigationGraph(
     composable(AppRoutes.CREATE_USER) {
         UserFormScreen(
             onBack = { navController.popBackStack() },
-            onSave = { navController.popBackStack() }
+            onSuccess = { navController.popBackStack() }
         )
     }
 
@@ -125,7 +117,7 @@ fun NavGraphBuilder.fleetManagerNavigationGraph(
         UserFormScreen(
             userId = userId,
             onBack = { navController.popBackStack() },
-            onSave = { navController.popBackStack() }
+            onSuccess = { navController.popBackStack() }
         )
     }
 
@@ -137,7 +129,7 @@ fun NavGraphBuilder.fleetManagerNavigationGraph(
         ReassignVehicleScreen(
             userId = userId,
             onBack = { navController.popBackStack() },
-            onConfirm = { navController.popBackStack() }
+            onSuccess = { navController.popBackStack() }
         )
     }
 

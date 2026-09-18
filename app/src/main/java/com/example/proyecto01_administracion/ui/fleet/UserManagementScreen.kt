@@ -18,23 +18,31 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.proyecto01_administracion.domain.models.User
 import com.example.proyecto01_administracion.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserManagementScreen(
+    viewModel: UserManagementViewModel = hiltViewModel(),
     onBack: () -> Unit,
     onNavigateToUserDetail: (String) -> Unit,
     onNavigateToCreateUser: () -> Unit
 ) {
-    var searchQuery by remember { mutableStateOf("") }
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    val users = listOf(
-        UserItem("1-2345-6789", "Juan Pérez", "Conductor", "juan.perez@example.com", "Toyota Hilux · ABC-123", "Activo", StatusGreen),
-        UserItem("2-3456-7890", "María López", "Mecánico", "maria.lopez@example.com", null, "Activo", StatusGreen),
-        UserItem("3-4567-8901", "Carlos Rodríguez", "Encargado", "carlos.r@example.com", null, "Activo", StatusGreen)
-    )
+    val filteredUsers = remember(uiState.users, uiState.searchQuery) {
+        uiState.users.filter { user ->
+            user.nombre.contains(uiState.searchQuery, ignoreCase = true) ||
+            user.correo.contains(uiState.searchQuery, ignoreCase = true) ||
+            user.cedula.contains(uiState.searchQuery, ignoreCase = true)
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -70,16 +78,16 @@ fun UserManagementScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Usuarios", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                Text("Activos: 8 · Suspendidos: 1", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("Listado de Usuarios", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                Text("Total: ${uiState.users.size}", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
             OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
-                placeholder = { Text("Buscar usuario", color = MaterialTheme.colorScheme.onSurfaceVariant) },
+                value = uiState.searchQuery,
+                onValueChange = viewModel::onSearchQueryChange,
+                placeholder = { Text("Buscar por nombre, correo o cédula", color = MaterialTheme.colorScheme.onSurfaceVariant) },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = AccentBlue) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
@@ -96,12 +104,36 @@ fun UserManagementScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             Box(modifier = Modifier.weight(1f)) {
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    contentPadding = PaddingValues(bottom = 80.dp)
-                ) {
-                    items(users) { user ->
-                        UserCard(user = user, onClick = { onNavigateToUserDetail(user.id) })
+                if (uiState.isLoading) {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                } else if (filteredUsers.isEmpty()) {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Icon(Icons.Default.Person, contentDescription = null, tint = MaterialTheme.colorScheme.outline, modifier = Modifier.size(64.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "No hay usuarios para mostrar.",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = "Los usuarios registrados aparecerán aquí.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                } else {
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        contentPadding = PaddingValues(bottom = 80.dp)
+                    ) {
+                        items(filteredUsers) { user ->
+                            UserCard(user = user, onClick = { onNavigateToUserDetail(user.id) })
+                        }
                     }
                 }
                 
@@ -120,18 +152,11 @@ fun UserManagementScreen(
     }
 }
 
-data class UserItem(
-    val id: String,
-    val name: String,
-    val role: String,
-    val email: String,
-    val assignedVehicle: String?,
-    val status: String,
-    val statusColor: Color
-)
-
 @Composable
-fun UserCard(user: UserItem, onClick: () -> Unit) {
+fun UserCard(user: User, onClick: () -> Unit) {
+    val semanticColors = LocalTransAndinaColors.current
+    val statusColor = if (user.estado == "Activo") semanticColors.statusGreen else semanticColors.statusRed
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -149,15 +174,11 @@ fun UserCard(user: UserItem, onClick: () -> Unit) {
                 Icon(Icons.Default.Person, contentDescription = null, tint = AccentBlue)
             }
             Column(modifier = Modifier.weight(1f)) {
-                Text(text = user.name, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                Text(text = user.role, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Text(text = user.email, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                if (user.assignedVehicle != null) {
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(text = user.assignedVehicle, style = MaterialTheme.typography.labelSmall, color = AccentBlue, fontWeight = FontWeight.Medium)
-                }
+                Text(text = user.nombre, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                Text(text = user.rol_id, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(text = user.correo, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            Box(modifier = Modifier.size(8.dp).background(user.statusColor, CircleShape))
+            Box(modifier = Modifier.size(8.dp).background(statusColor, CircleShape))
         }
     }
 }

@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -17,27 +18,29 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.proyecto01_administracion.domain.models.Vehicle
 import com.example.proyecto01_administracion.ui.dashboard.VehicleSummary
+import com.example.proyecto01_administracion.ui.fleet.FleetViewModel
 import com.example.proyecto01_administracion.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VehicleSelectionScreen(
+    viewModel: FleetViewModel = hiltViewModel(),
     onBack: () -> Unit,
     onVehicleSelected: (String) -> Unit
 ) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val semanticColors = LocalTransAndinaColors.current
-    var searchQuery by remember { mutableStateOf("") }
 
-    val vehicles = listOf(
-        MechanicVehicleItem("ABC-123", "Toyota Hilux", "125,430 km", "Juan Pérez", "Al día", semanticColors.statusGreen),
-        MechanicVehicleItem("XYZ-456", "Isuzu NPR", "98,240 km", "María López", "Próximo", semanticColors.statusYellow),
-        MechanicVehicleItem("DEF-789", "Ford Transit", "87,650 km", "Carlos Rodríguez", "Atrasado", semanticColors.statusRed)
-    )
-
-    val filteredVehicles = vehicles.filter { 
-        it.plate.contains(searchQuery, ignoreCase = true) || 
-        it.model.contains(searchQuery, ignoreCase = true) 
+    val filteredVehicles = remember(uiState.vehicles, uiState.searchQuery) {
+        uiState.vehicles.filter { 
+            it.placa.contains(uiState.searchQuery, ignoreCase = true) || 
+            it.marca.contains(uiState.searchQuery, ignoreCase = true) ||
+            it.modelo.contains(uiState.searchQuery, ignoreCase = true)
+        }
     }
 
     Scaffold(
@@ -70,8 +73,8 @@ fun VehicleSelectionScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
+                value = uiState.searchQuery,
+                onValueChange = viewModel::onSearchQueryChange,
                 placeholder = { Text("Buscar por placa o modelo", color = MaterialTheme.colorScheme.onSurfaceVariant) },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = AccentBlue) },
                 modifier = Modifier.fillMaxWidth(),
@@ -88,32 +91,38 @@ fun VehicleSelectionScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                contentPadding = PaddingValues(bottom = 32.dp)
-            ) {
-                items(filteredVehicles) { vehicle ->
-                    MechanicVehicleCard(
-                        vehicle = vehicle,
-                        onClick = { onVehicleSelected(vehicle.plate) }
-                    )
+            if (uiState.isLoading) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            } else if (filteredVehicles.isEmpty()) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(Icons.Default.DirectionsCar, contentDescription = null, tint = MaterialTheme.colorScheme.outline, modifier = Modifier.size(64.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text("No hay vehículos disponibles", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
+            } else {
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    contentPadding = PaddingValues(bottom = 32.dp)
+                ) {
+                    items(filteredVehicles) { vehicle ->
+                        MechanicVehicleCard(
+                            vehicle = vehicle,
+                            statusColor = semanticColors.statusGreen, // Logic pending
+                            onClick = { onVehicleSelected(vehicle.placa) }
+                        )
+                    }
                 }
             }
         }
     }
 }
 
-data class MechanicVehicleItem(
-    val plate: String,
-    val model: String,
-    val mileage: String,
-    val conductor: String,
-    val statusLabel: String,
-    val statusColor: Color
-)
-
 @Composable
-fun MechanicVehicleCard(vehicle: MechanicVehicleItem, onClick: () -> Unit) {
+fun MechanicVehicleCard(vehicle: Vehicle, statusColor: Color, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -130,8 +139,8 @@ fun MechanicVehicleCard(vehicle: MechanicVehicleItem, onClick: () -> Unit) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             VehicleSummary(
-                model = vehicle.model, 
-                plate = vehicle.plate,
+                model = "${vehicle.marca} ${vehicle.modelo}", 
+                plate = vehicle.placa,
                 modifier = Modifier.weight(1f),
                 modelStyle = MaterialTheme.typography.titleMedium,
                 plateStyle = MaterialTheme.typography.labelMedium
@@ -141,13 +150,13 @@ fun MechanicVehicleCard(vehicle: MechanicVehicleItem, onClick: () -> Unit) {
                 Box(
                     modifier = Modifier
                         .size(8.dp)
-                        .background(vehicle.statusColor, CircleShape)
+                        .background(statusColor, CircleShape)
                 )
                 Text(
-                    text = vehicle.statusLabel,
+                    text = "Estado", // Should use real maintenance status
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Bold,
-                    color = vehicle.statusColor
+                    color = statusColor
                 )
             }
         }

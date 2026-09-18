@@ -18,18 +18,42 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.proyecto01_administracion.ui.fleet.FormTextField
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.proyecto01_administracion.ui.dashboard.FormTextField
+import com.example.proyecto01_administracion.ui.login.AuthViewModel
 import com.example.proyecto01_administracion.ui.theme.AccentBlue
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditProfileScreen(
+    authViewModel: AuthViewModel = hiltViewModel(),
     onBack: () -> Unit,
     onSave: () -> Unit
 ) {
-    var name by remember { mutableStateOf("Juan Pérez") }
-    var email by remember { mutableStateOf("juan.perez@transandina.com") }
-    var phone by remember { mutableStateOf("+506 8888-8888") }
+    val currentUser by authViewModel.currentUser.collectAsStateWithLifecycle()
+    val authUiState by authViewModel.uiState.collectAsStateWithLifecycle()
+    
+    var name by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var phone by remember { mutableStateOf("") }
+    var cedula by remember { mutableStateOf("") }
+
+    LaunchedEffect(currentUser) {
+        currentUser?.let {
+            name = it.nombre
+            email = it.correo
+            phone = it.telefono
+            cedula = it.cedula
+        }
+    }
+
+    LaunchedEffect(authUiState.profileUpdateSuccess) {
+        if (authUiState.profileUpdateSuccess) {
+            authViewModel.consumeProfileUpdateSuccess()
+            onSave()
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -63,7 +87,6 @@ fun EditProfileScreen(
         ) {
             Spacer(modifier = Modifier.height(24.dp))
             
-            // Avatar with Edit Icon
             Box(contentAlignment = Alignment.BottomEnd) {
                 Box(
                     modifier = Modifier
@@ -97,18 +120,22 @@ fun EditProfileScreen(
             Spacer(modifier = Modifier.height(8.dp))
             
             FormTextField(value = name, onValueChange = { name = it }, label = "Nombre completo")
-            FormTextField(value = email, onValueChange = { email = it }, label = "Correo electrónico")
+            FormTextField(value = email, onValueChange = { email = it }, label = "Correo electrónico", enabled = false)
             FormTextField(value = phone, onValueChange = { phone = it }, label = "Teléfono")
+            FormTextField(value = cedula, onValueChange = { cedula = it }, label = "Cédula")
             
             Spacer(modifier = Modifier.weight(1f))
             
             Button(
-                onClick = onSave,
+                onClick = { authViewModel.updateProfile(name, phone, cedula) },
                 modifier = Modifier.fillMaxWidth().height(56.dp).padding(bottom = 16.dp),
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(16.dp),
+                enabled = !authUiState.isLoading
             ) {
-                Text("Guardar Cambios", fontWeight = FontWeight.Bold)
+                if (authUiState.isLoading) CircularProgressIndicator(modifier = Modifier.size(22.dp))
+                else Text("Guardar Cambios", fontWeight = FontWeight.Bold)
             }
+            authUiState.profileUpdateError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
         }
     }
 }

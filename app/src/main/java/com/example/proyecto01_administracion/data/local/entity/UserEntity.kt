@@ -25,7 +25,7 @@ data class UserEntity(
     @PrimaryKey
     val id: String,
     val name: String,
-    val identification: String,
+    val identification: String? = null,
     val email: String,
     val phone: String? = null,
     val roleId: String,

@@ -37,7 +37,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.proyecto01_administracion.domain.model.UserRole
+import com.example.proyecto01_administracion.domain.models.UserRole
 import com.example.proyecto01_administracion.navigation.AppNavigation
 import com.example.proyecto01_administracion.navigation.AppRoutes
 import com.example.proyecto01_administracion.navigation.getSelectedItemForRole
@@ -47,7 +47,12 @@ import com.example.proyecto01_administracion.ui.dashboard.FleetBottomNavBar
 import com.example.proyecto01_administracion.ui.dashboard.MechanicBottomNavBar
 import com.example.proyecto01_administracion.ui.theme.Proyecto01AdministracionTheme
 import kotlinx.coroutines.launch
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.proyecto01_administracion.ui.login.AuthViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,7 +64,17 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MainApp() {
+fun MainApp(
+    authViewModel: AuthViewModel = hiltViewModel()
+) {
+    val currentUser by authViewModel.currentUser.collectAsStateWithLifecycle()
+    val userRole = when (currentUser?.rol_id) {
+        "DRIVER" -> UserRole.DRIVER
+        "MECHANIC" -> UserRole.MECHANIC
+        "FLEET_MANAGER" -> UserRole.FLEET_MANAGER
+        else -> UserRole.NONE
+    }
+
     var isDarkTheme by rememberSaveable { mutableStateOf(true) }
 
     Proyecto01AdministracionTheme(darkTheme = isDarkTheme) {
@@ -67,7 +82,6 @@ fun MainApp() {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
 
-        var userRole by rememberSaveable { mutableStateOf(UserRole.NONE) }
         val profileDrawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
         val moreDrawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
         val scope = rememberCoroutineScope()
@@ -87,7 +101,7 @@ fun MainApp() {
         if (isAuthScreen) {
             AppNavigation(
                 navController = navController,
-                onRoleChange = { userRole = it },
+                onRoleChange = { /* handled via SessionManager now */ },
                 isDarkTheme = isDarkTheme,
                 onThemeToggle = { isDarkTheme = it }
             )
@@ -96,21 +110,24 @@ fun MainApp() {
                 drawerState = profileDrawerState,
                 drawerContent = {
                     AppDrawer(
-                        userName = when (userRole) {
-                            UserRole.FLEET_MANAGER -> "Carlos Rodríguez"
-                            else -> "Juan Pérez"
-                        },
+                        userName = currentUser?.nombre ?: "Usuario",
                         userRole = when (userRole) {
                             UserRole.DRIVER -> "Conductor"
                             UserRole.MECHANIC -> "Mecánico"
-                            UserRole.FLEET_MANAGER -> "Encargado de Flotilla"
+                            UserRole.FLEET_MANAGER -> "Encargado de flota"
                             else -> ""
                         },
+                        onUsersManagementClick = if (userRole == UserRole.FLEET_MANAGER) {
+                            {
+                                scope.launch { profileDrawerState.close() }
+                                navController.navigate(AppRoutes.USER_MANAGEMENT)
+                            }
+                        } else null,
                         onLogout = {
                             scope.launch {
                                 profileDrawerState.close()
                                 moreDrawerState.close()
-                                userRole = UserRole.NONE
+                                authViewModel.logout()
                                 navController.navigate(AppRoutes.LOGIN) {
                                     popUpTo(AppRoutes.LOGIN) { inclusive = true }
                                 }
@@ -196,7 +213,7 @@ fun MainApp() {
                                 AppNavigation(
                                     navController = navController,
                                     modifier = Modifier.padding(innerPadding),
-                                    onRoleChange = { userRole = it },
+                                    onRoleChange = { /* handled via SessionManager */ },
                                     onOpenProfileDrawer = { scope.launch { profileDrawerState.open() } },
                                     isDarkTheme = isDarkTheme,
                                     onThemeToggle = { isDarkTheme = it }

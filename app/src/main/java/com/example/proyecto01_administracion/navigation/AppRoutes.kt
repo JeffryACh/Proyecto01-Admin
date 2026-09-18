@@ -3,6 +3,7 @@ package com.example.proyecto01_administracion.navigation
 object AppRoutes {
     const val ARG_PLATE = "plate"
     const val ARG_USER_ID = "userId"
+    const val ARG_MAINTENANCE_ID = "maintenanceId"
 
     const val LOGIN = "login"
     const val PASSWORD_RECOVERY = "password_recovery"
@@ -15,13 +16,14 @@ object AppRoutes {
     const val REGISTER_MILEAGE = "register_mileage"
     const val MAINTENANCE_HISTORY = "maintenance_history"
     const val MILEAGE_HISTORY = "mileage_history"
-    const val VEHICLE_DOCUMENTS = "vehicle_documents"
+    const val VEHICLE_DOCUMENTS = "vehicle_documents/{plate}"
+    const val ADD_DOCUMENT = "add_document/{plate}"
     const val ALERTS = "alerts"
 
     const val MECHANIC_DASHBOARD = "mechanic_dashboard"
     const val MECHANIC_VEHICLE_SELECTION = "mechanic_vehicle_selection"
     const val REGISTER_MAINTENANCE = "register_maintenance/{plate}"
-    const val MAINTENANCE_DETAIL = "maintenance_detail"
+    const val MAINTENANCE_DETAIL = "maintenance_detail/{maintenanceId}"
 
     const val FLEET_MANAGER_DASHBOARD = "fleet_manager_dashboard"
     const val FLEET_MANAGEMENT = "fleet_management"
@@ -38,6 +40,9 @@ object AppRoutes {
     const val FLEET_ALERTS = "fleet_alerts"
 
     fun registerMaintenance(plate: String) = "register_maintenance/$plate"
+    fun maintenanceDetail(id: String) = "maintenance_detail/$id"
+    fun vehicleDocuments(plate: String) = "vehicle_documents/$plate"
+    fun addDocument(plate: String) = "add_document/$plate"
     fun fleetVehicleDetail(plate: String) = "fleet_vehicle_detail/$plate"
     fun reassignDriver(plate: String) = "reassign_driver/$plate"
     fun vehicleForm(plate: String) = "vehicle_form?$ARG_PLATE=$plate"

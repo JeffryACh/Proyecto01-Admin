@@ -9,9 +9,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.proyecto01_administracion.domain.models.Vehicle
 
 @Composable
 fun ConsultVehiclesCard(
+    vehicles: List<Vehicle>,
     onViewAll: () -> Unit
 ) {
     Card(
@@ -28,30 +30,26 @@ fun ConsultVehiclesCard(
             modifier = Modifier.padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            ConsultVehicleItem(
-                model = "Toyota Hilux",
-                plate = "ABC-123",
-                mileage = "125,430 km",
-                onClick = onViewAll
-            )
-            
-            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
-            
-            ConsultVehicleItem(
-                model = "Isuzu NPR",
-                plate = "XYZ-456",
-                mileage = "98,240 km",
-                onClick = onViewAll
-            )
-
-            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
-
-            ConsultVehicleItem(
-                model = "Ford Transit",
-                plate = "DEF-789",
-                mileage = "87,650 km",
-                onClick = onViewAll
-            )
+            if (vehicles.isEmpty()) {
+                Text(
+                    text = "No hay vehículos disponibles.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            } else {
+                vehicles.take(3).forEachIndexed { index, vehicle ->
+                    ConsultVehicleItem(
+                        model = "${vehicle.marca} ${vehicle.modelo}",
+                        plate = vehicle.placa,
+                        mileage = "${vehicle.kilometraje_actual} km",
+                        onClick = onViewAll
+                    )
+                    
+                    if (index < vehicles.take(3).size - 1) {
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
+                    }
+                }
+            }
 
             HistoryLink(
                 text = "Ver todos los vehículos",

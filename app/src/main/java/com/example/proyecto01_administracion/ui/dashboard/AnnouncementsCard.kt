@@ -13,11 +13,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.proyecto01_administracion.ui.theme.AccentBlue
-import com.example.proyecto01_administracion.ui.theme.StatusRed
-import com.example.proyecto01_administracion.ui.theme.StatusYellow
+
+data class Announcement(val text: String, val color: Color)
 
 @Composable
 fun AnnouncementsCard(
+    announcements: List<Announcement>,
     onViewAlerts: () -> Unit
 ) {
     Card(
@@ -41,10 +42,18 @@ fun AnnouncementsCard(
                 color = MaterialTheme.colorScheme.onSurface
             )
 
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                AnnouncementItem(text = "2 vehículos con mantenimiento atrasado", color = StatusRed)
-                AnnouncementItem(text = "1 documento próximo a vencer", color = StatusYellow)
-                AnnouncementItem(text = "Toyota Hilux — mantenimiento próximo", color = StatusYellow)
+            if (announcements.isEmpty()) {
+                Text(
+                    text = "No hay anuncios nuevos.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            } else {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    announcements.forEach { announcement ->
+                        AnnouncementItem(text = announcement.text, color = announcement.color)
+                    }
+                }
             }
 
             TextButton(

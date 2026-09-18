@@ -19,6 +19,12 @@ interface VehicleDao {
     @Query("SELECT * FROM vehicles WHERE id = :id LIMIT 1")
     suspend fun getById(id: String): VehicleEntity?
 
+    @Query("SELECT * FROM vehicles WHERE id = :id LIMIT 1")
+    fun observeById(id: String): Flow<VehicleEntity?>
+
+    @Query("UPDATE vehicles SET status = :status, syncStatus = :syncStatus, updatedAt = :updatedAt WHERE id = :id")
+    suspend fun updateStatus(id: String, status: String, syncStatus: SyncStatus = SyncStatus.PENDING, updatedAt: Long = System.currentTimeMillis())
+
     @Query("SELECT * FROM vehicles WHERE plate = :plate LIMIT 1")
     suspend fun getByPlate(plate: String): VehicleEntity?
 

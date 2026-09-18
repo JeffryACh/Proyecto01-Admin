@@ -20,7 +20,7 @@ fun VehicleCard(
     model: String,
     plate: String,
     mileage: String,
-    status: VehicleStatus,
+    status: VehicleStatus?,
     nextMaintenanceTask: String,
     remainingKm: String,
     progress: Float
@@ -83,7 +83,15 @@ fun VehicleCard(
                         color = MaterialTheme.colorScheme.onSurface
                     )
                 }
-                StatusIndicator(status = status)
+                if (status != null) {
+                    StatusIndicator(status = status)
+                } else {
+                    Text(
+                        text = "Estado no disponible",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -109,36 +117,40 @@ fun VehicleCard(
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
-                Text(
-                    text = "En $remainingKm",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = AccentBlue
-                )
+                if (remainingKm.isNotBlank()) {
+                    Text(
+                        text = "En $remainingKm",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = AccentBlue
+                    )
+                }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            if (remainingKm.isNotBlank()) {
+                Spacer(modifier = Modifier.height(12.dp))
 
-            // Progress Bar with Gradient
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(8.dp)
-                    .background(
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
-                        shape = RoundedCornerShape(4.dp)
-                    )
-            ) {
+                // Progress Bar with Gradient
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth(progress)
-                        .fillMaxHeight()
+                        .fillMaxWidth()
+                        .height(8.dp)
                         .background(
-                            brush = Brush.horizontalGradient(
-                                colors = listOf(AccentBlue, AccentPurple)
-                            ),
+                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
                             shape = RoundedCornerShape(4.dp)
                         )
-                )
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(progress)
+                            .fillMaxHeight()
+                            .background(
+                                brush = Brush.horizontalGradient(
+                                    colors = listOf(AccentBlue, AccentPurple)
+                                ),
+                                shape = RoundedCornerShape(4.dp)
+                            )
+                    )
+                }
             }
         }
     }

@@ -19,30 +19,29 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.proyecto01_administracion.ui.dashboard.AlertFilterChip
 import com.example.proyecto01_administracion.ui.dashboard.AlertStat
+import com.example.proyecto01_administracion.ui.dashboard.AlertViewModel
+import com.example.proyecto01_administracion.ui.dashboard.formatRelativeAlertTime
 import com.example.proyecto01_administracion.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FleetAlertsScreen(
+    viewModel: AlertViewModel = hiltViewModel(),
     onBack: () -> Unit
 ) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val semanticColors = LocalTransAndinaColors.current
-    val allAlerts = listOf(
-        FleetAlert("Urgente", "ABC-123: Cambio de frenos atrasado por 200 km", semanticColors.statusRed),
-        FleetAlert("Urgente", "GHI-789: Revisión técnica vence mañana", semanticColors.statusRed),
-        FleetAlert("Próxima", "DEF-456: Mantenimiento preventivo en 500 km", semanticColors.statusYellow),
-        FleetAlert("Próxima", "JKL-012: Seguro vence en 15 días", semanticColors.statusYellow),
-        FleetAlert("Informativa", "MNO-345: Nuevo registro de kilometraje", semanticColors.statusBlue)
-    )
 
     var selectedFilter by remember { mutableStateOf("Todas") }
 
     val filteredAlerts = if (selectedFilter == "Todas") {
-        allAlerts
+        uiState.alerts
     } else {
-        allAlerts.filter { it.type == selectedFilter.removeSuffix("s") }
+        uiState.alerts.filter { it.severidad == selectedFilter }
     }
 
     Scaffold(
@@ -88,19 +87,19 @@ fun FleetAlertsScreen(
                 ) {
                     AlertStat(
                         modifier = Modifier.weight(1f),
-                        count = "${allAlerts.count { it.type == "Urgente" }}",
+                        count = "${uiState.alerts.count { it.severidad == "Rojo" }}",
                         label = "Urgente",
                         color = semanticColors.statusRed
                     )
                     AlertStat(
                         modifier = Modifier.weight(1f),
-                        count = "${allAlerts.count { it.type == "Próxima" }}",
+                        count = "${uiState.alerts.count { it.severidad == "Amarillo" }}",
                         label = "Próxima",
                         color = semanticColors.statusYellow
                     )
                     AlertStat(
                         modifier = Modifier.weight(1f),
-                        count = "${allAlerts.count { it.type == "Informativa" }}",
+                        count = "${uiState.alerts.count { it.severidad == "Info" }}",
                         label = "Info",
                         color = semanticColors.statusBlue
                     )
@@ -112,31 +111,51 @@ fun FleetAlertsScreen(
             // Filters
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 AlertFilterChip(selected = selectedFilter == "Todas", label = "Todas", onClick = { selectedFilter = "Todas" })
-                AlertFilterChip(selected = selectedFilter == "Urgentes", label = "Urgentes", onClick = { selectedFilter = "Urgentes" })
-                AlertFilterChip(selected = selectedFilter == "Próximas", label = "Próximas", onClick = { selectedFilter = "Próximas" })
+                AlertFilterChip(selected = selectedFilter == "Rojo", label = "Urgentes", onClick = { selectedFilter = "Rojo" })
+                AlertFilterChip(selected = selectedFilter == "Amarillo", label = "Próximas", onClick = { selectedFilter = "Amarillo" })
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            LazyColumn(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                contentPadding = PaddingValues(bottom = 32.dp)
-            ) {
-                items(filteredAlerts) { alert ->
-                    FleetAlertCard(alert = alert)
+            if (uiState.isLoading) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            } else if (uiState.error != null) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(uiState.error!!, color = MaterialTheme.colorScheme.error)
+                }
+            } else if (filteredAlerts.isEmpty()) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("No hay alertas registradas", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    contentPadding = PaddingValues(bottom = 32.dp)
+                ) {
+                    items(filteredAlerts) { alert ->
+                        FleetAlertCard(
+                            type = alert.severidad,
+                            message = alert.mensaje,
+                            dateLabel = formatRelativeAlertTime(alert.fecha_creacion),
+                            color = when(alert.severidad) {
+                                "Rojo" -> semanticColors.statusRed
+                                "Amarillo" -> semanticColors.statusYellow
+                                else -> semanticColors.statusBlue
+                            }
+                        )
+                    }
                 }
             }
         }
     }
 }
 
-data class FleetAlert(val type: String, val message: String, val color: Color)
-
 @Composable
-fun FleetAlertCard(alert: FleetAlert) {
+fun FleetAlertCard(type: String, message: String, dateLabel: String, color: Color) {
     val semanticColors = LocalTransAndinaColors.current
-    val color = alert.color
     
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -163,9 +182,11 @@ fun FleetAlertCard(alert: FleetAlert) {
                 )
             }
             Column {
-                Text(text = alert.type, color = color, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                Text(text = type, color = color, fontWeight = FontWeight.Bold, fontSize = 14.sp)
                 Spacer(modifier = Modifier.height(4.dp))
-                Text(text = alert.message, color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyMedium, lineHeight = 20.sp)
+                Text(text = message, color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyMedium, lineHeight = 20.sp)
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(text = dateLabel, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelSmall)
             }
         }
     }

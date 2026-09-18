@@ -14,22 +14,27 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.proyecto01_administracion.ui.theme.AccentBlue
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PasswordRecoveryScreen(
+    viewModel: AuthViewModel = hiltViewModel(),
     onBack: () -> Unit
 ) {
-    var email by remember { mutableStateOf("") }
-    var isSubmitted by remember { mutableStateOf(false) }
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Recuperar Contraseña", color = MaterialTheme.colorScheme.onSurface) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(onClick = {
+                        viewModel.resetState()
+                        onBack()
+                    }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Regresar",
@@ -53,7 +58,7 @@ fun PasswordRecoveryScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            if (!isSubmitted) {
+            if (!uiState.isRecoveryEmailSent) {
                 Text(
                     text = "Ingresa tu correo electrónico para recibir las instrucciones de recuperación.",
                     style = MaterialTheme.typography.bodyLarge,
@@ -61,11 +66,12 @@ fun PasswordRecoveryScreen(
                 )
 
                 OutlinedTextField(
-                    value = email,
-                    onValueChange = { email = it },
+                    value = uiState.email,
+                    onValueChange = viewModel::onEmailChange,
                     placeholder = { Text("ejemplo@transandina.com", color = MaterialTheme.colorScheme.onSurfaceVariant) },
                     leadingIcon = { Icon(Icons.Default.Email, contentDescription = null, tint = AccentBlue) },
                     modifier = Modifier.fillMaxWidth(),
+                    enabled = !uiState.isLoading,
                     shape = RoundedCornerShape(16.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -77,16 +83,28 @@ fun PasswordRecoveryScreen(
                     )
                 )
 
+                if (uiState.error != null) {
+                    Text(
+                        text = uiState.error!!,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+
                 Button(
-                    onClick = { isSubmitted = true },
+                    onClick = viewModel::sendRecoveryEmail,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp),
                     shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = AccentBlue),
-                    enabled = email.isNotEmpty()
+                    enabled = uiState.email.isNotEmpty() && !uiState.isLoading
                 ) {
-                    Text("Enviar instrucciones", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    if (uiState.isLoading) {
+                        CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+                    } else {
+                        Text("Enviar instrucciones", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    }
                 }
             } else {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -94,14 +112,17 @@ fun PasswordRecoveryScreen(
                         Icon(Icons.Default.Email, contentDescription = null, tint = AccentBlue, modifier = Modifier.size(64.dp))
                         Text(text = "Correo enviado", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                         Text(
-                            text = "Hemos enviado un enlace de recuperación a $email",
+                            text = "Si existe una cuenta asociada a ese correo, recibirás las instrucciones de recuperación.",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             textAlign = TextAlign.Center
                         )
                         Spacer(modifier = Modifier.height(24.dp))
                         Button(
-                            onClick = onBack,
+                            onClick = {
+                                viewModel.resetState()
+                                onBack()
+                            },
                             modifier = Modifier.fillMaxWidth().height(56.dp),
                             shape = RoundedCornerShape(16.dp)
                         ) {

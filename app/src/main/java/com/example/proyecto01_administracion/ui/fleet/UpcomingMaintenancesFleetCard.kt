@@ -14,8 +14,17 @@ import androidx.compose.ui.unit.dp
 import com.example.proyecto01_administracion.ui.dashboard.HistoryLink
 import com.example.proyecto01_administracion.ui.theme.*
 
+data class UpcomingMaintenance(
+    val vehicleModel: String,
+    val plate: String,
+    val task: String,
+    val remainingInfo: String,
+    val statusColor: Color
+)
+
 @Composable
 fun UpcomingMaintenancesFleetCard(
+    maintenances: List<UpcomingMaintenance>,
     onViewAll: () -> Unit
 ) {
     Card(
@@ -32,23 +41,27 @@ fun UpcomingMaintenancesFleetCard(
             modifier = Modifier.padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            MaintenanceFleetItem(
-                vehicle = "Toyota Hilux",
-                plate = "ABC-123",
-                task = "Cambio de aceite",
-                remaining = "450 km restantes",
-                statusColor = StatusYellow
-            )
-            
-            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
-            
-            MaintenanceFleetItem(
-                vehicle = "Volvo FH",
-                plate = "GHI-789",
-                task = "Revisión general",
-                remaining = "1.200 km restantes",
-                statusColor = StatusYellow
-            )
+            if (maintenances.isEmpty()) {
+                Text(
+                    text = "No hay mantenimientos próximos.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            } else {
+                maintenances.take(2).forEachIndexed { index, item ->
+                    MaintenanceFleetItem(
+                        vehicle = item.vehicleModel,
+                        plate = item.plate,
+                        task = item.task,
+                        remaining = item.remainingInfo,
+                        statusColor = item.statusColor
+                    )
+                    
+                    if (index < maintenances.take(2).size - 1) {
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
+                    }
+                }
+            }
 
             HistoryLink(
                 text = "Ver Mantenimientos",

@@ -19,8 +19,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.proyecto01_administracion.domain.models.Vehicle
+import com.example.proyecto01_administracion.FleetStatus
 import com.example.proyecto01_administracion.ui.dashboard.VehicleSummary
 import com.example.proyecto01_administracion.ui.dashboard.AppFilterChip
 import com.example.proyecto01_administracion.ui.theme.*
@@ -28,28 +33,30 @@ import com.example.proyecto01_administracion.ui.theme.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FleetManagementScreen(
+    viewModel: FleetViewModel = hiltViewModel(),
     onBack: () -> Unit,
     onNavigateToVehicleDetail: (String) -> Unit,
     onNavigateToCreateVehicle: () -> Unit
 ) {
-    var searchQuery by remember { mutableStateOf("") }
-    var selectedFilter by remember { mutableStateOf("Todos") }
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    val allVehicles = listOf(
-        FleetVehicleItem("ABC-123", "Toyota Hilux", "125,430 km", "Juan Pérez", "Cambio de aceite", "Al día", StatusGreen),
-        FleetVehicleItem("XYZ-456", "Isuzu NPR", "98,240 km", "María López", "Revisión de frenos", "Próximo", StatusYellow),
-        FleetVehicleItem("DEF-789", "Ford Transit", "87,650 km", "Carlos Rodríguez", "Revisión general", "Atrasado", StatusRed),
-        FleetVehicleItem("GHI-012", "Mitsubishi L200", "45,000 km", "Ana García", "Cambio de filtros", "Al día", StatusGreen),
-        FleetVehicleItem("JKL-345", "Nissan Frontier", "67,890 km", "Pedro Ruiz", "Alineamiento", "Próximo", StatusYellow),
-        FleetVehicleItem("MNO-678", "Hino 300", "150,200 km", "Luis Torres", "Reparación motor", "Atrasado", StatusRed)
-    )
-
-    val filteredVehicles = remember(searchQuery, selectedFilter) {
-        allVehicles.filter { vehicle ->
-            (selectedFilter == "Todos" || vehicle.status == selectedFilter) &&
-            (vehicle.plate.contains(searchQuery, ignoreCase = true) || 
-             vehicle.model.contains(searchQuery, ignoreCase = true) ||
-             vehicle.conductor.contains(searchQuery, ignoreCase = true))
+    val filteredVehicles = remember(uiState.vehicles, uiState.fleetStatusByVehicleId, uiState.searchQuery, uiState.selectedFilter) {
+        uiState.vehicles.filter { vehicle ->
+            // Filter logic:
+            val matchesSearch = vehicle.placa.contains(uiState.searchQuery, ignoreCase = true) || 
+                               vehicle.marca.contains(uiState.searchQuery, ignoreCase = true) ||
+                               vehicle.modelo.contains(uiState.searchQuery, ignoreCase = true)
+            
+            val status = uiState.fleetStatusByVehicleId[vehicle.id]
+            val matchesFilter = when (uiState.selectedFilter) {
+                "Todos" -> true
+                "Inactivos" -> vehicle.estado == "Inactivo"
+                "Al día" -> vehicle.estado == "Activo" && status == FleetStatus.UP_TO_DATE
+                "Próximos" -> vehicle.estado == "Activo" && status == FleetStatus.MAINTENANCE_DUE_SOON
+                "Atrasados" -> vehicle.estado == "Activo" && status == FleetStatus.MAINTENANCE_OVERDUE
+                else -> false
+            }
+            matchesSearch && matchesFilter
         }
     }
 
@@ -58,7 +65,7 @@ fun FleetManagementScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Flota", color = MaterialTheme.colorScheme.onSurface) },
+                title = { Text("Gestión de Flota", color = MaterialTheme.colorScheme.onSurface) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
@@ -84,42 +91,51 @@ fun FleetManagementScreen(
         ) {
             Spacer(modifier = Modifier.height(16.dp))
             
-            // Summary Cards Header
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                FleetSummaryCard(
-                    modifier = Modifier.weight(1f),
-                    label = "Al día",
-                    count = "${allVehicles.count { it.status == "Al día" }}",
-                    color = semanticColors.statusGreen,
-                    isSelected = selectedFilter == "Al día",
-                    onClick = { selectedFilter = if (selectedFilter == "Al día") "Todos" else "Al día" }
-                )
-                FleetSummaryCard(
-                    modifier = Modifier.weight(1f),
-                    label = "Próximos",
-                    count = "${allVehicles.count { it.status == "Próximo" }}",
-                    color = semanticColors.statusYellow,
-                    isSelected = selectedFilter == "Próximo",
-                    onClick = { selectedFilter = if (selectedFilter == "Próximo") "Todos" else "Próximo" }
-                )
-                FleetSummaryCard(
-                    modifier = Modifier.weight(1f),
-                    label = "Atrasados",
-                    count = "${allVehicles.count { it.status == "Atrasado" }}",
-                    color = semanticColors.statusRed,
-                    isSelected = selectedFilter == "Atrasado",
-                    onClick = { selectedFilter = if (selectedFilter == "Atrasado") "Todos" else "Atrasado" }
-                )
+            // 2x2 Grid for Summary Cards
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    FleetSummaryCard(
+                        modifier = Modifier.weight(1f),
+                        label = "Al día",
+                        count = uiState.upToDateCount.toString(),
+                        color = semanticColors.statusGreen,
+                        isSelected = uiState.selectedFilter == "Al día",
+                        onClick = { viewModel.onFilterChange(if (uiState.selectedFilter == "Al día") "Todos" else "Al día") }
+                    )
+                    FleetSummaryCard(
+                        modifier = Modifier.weight(1f),
+                        label = "Próximos",
+                        count = uiState.dueSoonCount.toString(),
+                        color = semanticColors.statusYellow,
+                        isSelected = uiState.selectedFilter == "Próximos",
+                        onClick = { viewModel.onFilterChange(if (uiState.selectedFilter == "Próximos") "Todos" else "Próximos") }
+                    )
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    FleetSummaryCard(
+                        modifier = Modifier.weight(1f),
+                        label = "Atrasados",
+                        count = uiState.overdueCount.toString(),
+                        color = semanticColors.statusRed,
+                        isSelected = uiState.selectedFilter == "Atrasados",
+                        onClick = { viewModel.onFilterChange(if (uiState.selectedFilter == "Atrasados") "Todos" else "Atrasados") }
+                    )
+                    FleetSummaryCard(
+                        modifier = Modifier.weight(1f),
+                        label = "Inactivos",
+                        count = uiState.inactiveCount.toString(),
+                        color = Color.Gray,
+                        isSelected = uiState.selectedFilter == "Inactivos",
+                        onClick = { viewModel.onFilterChange(if (uiState.selectedFilter == "Inactivos") "Todos" else "Inactivos") }
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
             OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
+                value = uiState.searchQuery,
+                onValueChange = viewModel::onSearchQueryChange,
                 placeholder = { Text("Buscar vehículo", color = MaterialTheme.colorScheme.onSurfaceVariant) },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = AccentBlue) },
                 modifier = Modifier.fillMaxWidth(),
@@ -143,21 +159,51 @@ fun FleetManagementScreen(
                     .horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                AppFilterChip(selected = selectedFilter == "Todos", label = "Todos", onClick = { selectedFilter = "Todos" })
-                AppFilterChip(selected = selectedFilter == "Al día", label = "Al día", onClick = { selectedFilter = "Al día" })
-                AppFilterChip(selected = selectedFilter == "Próximo", label = "Próximos", onClick = { selectedFilter = "Próximo" })
-                AppFilterChip(selected = selectedFilter == "Atrasado", label = "Atrasados", onClick = { selectedFilter = "Atrasado" })
+                AppFilterChip(selected = uiState.selectedFilter == "Todos", label = "Todos", onClick = { viewModel.onFilterChange("Todos") })
+                AppFilterChip(selected = uiState.selectedFilter == "Al día", label = "Al día", onClick = { viewModel.onFilterChange("Al día") })
+                AppFilterChip(selected = uiState.selectedFilter == "Próximos", label = "Próximos", onClick = { viewModel.onFilterChange("Próximos") })
+                AppFilterChip(selected = uiState.selectedFilter == "Atrasados", label = "Atrasados", onClick = { viewModel.onFilterChange("Atrasados") })
+                AppFilterChip(selected = uiState.selectedFilter == "Inactivos", label = "Inactivos", onClick = { viewModel.onFilterChange("Inactivos") })
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
             Box(modifier = Modifier.weight(1f)) {
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    contentPadding = PaddingValues(bottom = 80.dp)
-                ) {
-                    items(filteredVehicles) { vehicle ->
-                        FleetVehicleCard(vehicle = vehicle, onClick = { onNavigateToVehicleDetail(vehicle.plate) })
+                if (uiState.isLoading) {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                } else if (uiState.error != null) {
+                    Text(uiState.error!!, color = MaterialTheme.colorScheme.error, modifier = Modifier.align(Alignment.Center))
+                } else if (filteredVehicles.isEmpty()) {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Icon(Icons.Default.DirectionsCar, contentDescription = null, tint = MaterialTheme.colorScheme.outline, modifier = Modifier.size(64.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "No hay vehículos registrados",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = "Los vehículos aparecerán aquí.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                } else {
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        contentPadding = PaddingValues(bottom = 80.dp)
+                    ) {
+                        items(filteredVehicles) { vehicle ->
+                            FleetVehicleCard(
+                                vehicle = vehicle,
+                                onClick = { onNavigateToVehicleDetail(vehicle.placa) }
+                            )
+                        }
                     }
                 }
                 
@@ -196,7 +242,7 @@ fun FleetSummaryCard(
     ) {
         Column(
             modifier = Modifier
-                .padding(16.dp)
+                .padding(12.dp)
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
@@ -208,7 +254,7 @@ fun FleetSummaryCard(
                 )
                 Text(
                     text = label,
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1
@@ -216,7 +262,7 @@ fun FleetSummaryCard(
             }
             Text(
                 text = count,
-                style = MaterialTheme.typography.headlineMedium,
+                style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.ExtraBold,
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -225,7 +271,7 @@ fun FleetSummaryCard(
 }
 
 @Composable
-fun FleetVehicleCard(vehicle: FleetVehicleItem, onClick: () -> Unit) {
+fun FleetVehicleCard(vehicle: Vehicle, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -240,41 +286,34 @@ fun FleetVehicleCard(vehicle: FleetVehicleItem, onClick: () -> Unit) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.Top
             ) {
-                VehicleSummary(model = vehicle.model, plate = vehicle.plate)
+                VehicleSummary(model = "${vehicle.marca} ${vehicle.modelo}", plate = vehicle.placa)
                 Text(
-                    text = vehicle.mileage, 
+                    text = "${vehicle.kilometraje_actual} km", 
                     style = MaterialTheme.typography.bodyMedium, 
                     fontWeight = FontWeight.Bold, 
                     color = MaterialTheme.colorScheme.onSurface
                 )
             }
             
-            Spacer(modifier = Modifier.height(16.dp))
-            
+            Spacer(modifier = Modifier.height(12.dp))
             HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-            
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Column {
-                    Text("Conductor", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text(vehicle.conductor, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
+                    Text("Clasificación", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(vehicle.clasificacion, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
                 }
                 Column(horizontalAlignment = Alignment.End) {
-                    Text("Próximo", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text(vehicle.nextTask, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
+                    Text("Estado", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(vehicle.estado, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
                 }
             }
             
             Spacer(modifier = Modifier.height(12.dp))
             
             val semanticColors = LocalTransAndinaColors.current
-            val displayColor = when(vehicle.statusColor) {
-                StatusGreen -> semanticColors.statusGreen
-                StatusYellow -> semanticColors.statusYellow
-                StatusRed -> semanticColors.statusRed
-                else -> vehicle.statusColor
-            }
+            val displayColor = if (vehicle.estado == "Inactivo") Color.Gray else semanticColors.statusGreen // Logic pending
             
             Surface(
                 color = displayColor.copy(alpha = 0.1f),
@@ -282,7 +321,7 @@ fun FleetVehicleCard(vehicle: FleetVehicleItem, onClick: () -> Unit) {
                 border = BorderStroke(1.dp, displayColor.copy(alpha = 0.5f))
             ) {
                 Text(
-                    text = vehicle.status,
+                    text = vehicle.estado,
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                     color = displayColor,
                     fontSize = 12.sp,
@@ -292,13 +331,3 @@ fun FleetVehicleCard(vehicle: FleetVehicleItem, onClick: () -> Unit) {
         }
     }
 }
-
-data class FleetVehicleItem(
-    val plate: String,
-    val model: String,
-    val mileage: String,
-    val conductor: String,
-    val nextTask: String,
-    val status: String,
-    val statusColor: Color
-)

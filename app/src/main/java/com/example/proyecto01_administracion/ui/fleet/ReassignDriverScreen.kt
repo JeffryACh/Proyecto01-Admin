@@ -13,8 +13,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.proyecto01_administracion.ui.dashboard.VehicleSummary
 import com.example.proyecto01_administracion.ui.theme.*
 
@@ -22,11 +25,21 @@ import com.example.proyecto01_administracion.ui.theme.*
 @Composable
 fun ReassignDriverScreen(
     plate: String,
+    viewModel: AssignmentViewModel = hiltViewModel(),
     onBack: () -> Unit,
-    onConfirm: () -> Unit
+    onSuccess: () -> Unit
 ) {
-    var selectedDriver by remember { mutableStateOf("Juan Pérez") }
-    val drivers = listOf("Juan Pérez", "María López", "Carlos Rodríguez", "Ana García")
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(plate) {
+        viewModel.loadData(plate)
+    }
+
+    LaunchedEffect(uiState.isSuccess) {
+        if (uiState.isSuccess) {
+            onSuccess()
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -52,46 +65,61 @@ fun ReassignDriverScreen(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                border = CardDefaults.outlinedCardBorder()
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 Column(modifier = Modifier.padding(20.dp)) {
                     Text("Vehículo", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    VehicleSummary(model = "Toyota Hilux", plate = plate)
+                    VehicleSummary(
+                        model = uiState.vehicle?.let { "${it.marca} ${it.modelo}" } ?: if (uiState.isLoading) "Cargando…" else "No registrado",
+                        plate = plate
+                    )
                 }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Text("Conductor actual: Juan Pérez", style = MaterialTheme.typography.bodyMedium, color = AccentBlue, fontWeight = FontWeight.Bold)
-
-            Spacer(modifier = Modifier.height(16.dp))
-
             Text("Seleccionar nuevo conductor", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
 
-            LazyColumn(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                contentPadding = PaddingValues(vertical = 16.dp)
-            ) {
-                items(drivers) { driver ->
-                    DriverOptionItem(
-                        name = driver,
-                        isSelected = selectedDriver == driver,
-                        onClick = { selectedDriver = driver }
-                    )
+            if (uiState.isLoading) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 32.dp))
+            } else if (uiState.error != null) {
+                Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    Text(uiState.error!!, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.error)
+                }
+            } else if (uiState.drivers.isEmpty()) {
+                Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    Text("No hay conductores disponibles.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(vertical = 16.dp)
+                ) {
+                    items(uiState.drivers) { driver ->
+                        DriverOptionItem(
+                            name = driver.nombre,
+                            isSelected = uiState.selectedDriverId == driver.id,
+                            onClick = { viewModel.onDriverSelected(driver.id) }
+                        )
+                    }
                 }
             }
 
             Button(
-                onClick = onConfirm,
+                onClick = viewModel::reassign,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp)
-                    .padding(bottom = 8.dp),
+                    .padding(bottom = 16.dp),
+                enabled = !uiState.isLoading && uiState.selectedDriverId.isNotBlank(),
                 shape = RoundedCornerShape(16.dp)
             ) {
-                Text("Confirmar reasignación", fontWeight = FontWeight.Bold)
+                if (uiState.isLoading) {
+                    CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+                } else {
+                    Text("Confirmar reasignación", fontWeight = FontWeight.Bold)
+                }
             }
         }
     }

@@ -1,56 +1,43 @@
 package com.example.proyecto01_administracion.ui.vehicle
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.example.proyecto01_administracion.ui.dashboard.VehicleSummary
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.proyecto01_administracion.ui.dashboard.FormTextField
 import com.example.proyecto01_administracion.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterMileageScreen(
+    viewModel: MileageViewModel = hiltViewModel(),
     onBack: () -> Unit,
-    onSuccess: () -> Unit = {}
+    onSuccess: () -> Unit
 ) {
-    val semanticColors = LocalTransAndinaColors.current
-    var mileage by remember { mutableStateOf("") }
-    var date by remember { mutableStateOf("") } 
-    var showConfirmation by remember { mutableStateOf(false) }
-    
-    val lastMileage = 125430
-    val isMileageValid = mileage.isNotEmpty() && (mileage.toIntOrNull() ?: 0) > lastMileage
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    if (showConfirmation) {
-        AlertDialog(
-            onDismissRequest = { },
-            confirmButton = {
-                TextButton(onClick = { 
-                    showConfirmation = false
-                    onSuccess() 
-                }) {
-                    Text("OK", color = AccentBlue)
-                }
-            },
-            title = { Text("Éxito", color = MaterialTheme.colorScheme.onSurface) },
-            text = { Text("Kilometraje registrado correctamente", color = MaterialTheme.colorScheme.onSurfaceVariant) },
-            containerColor = MaterialTheme.colorScheme.surface
-        )
+    LaunchedEffect(uiState.isSuccess) {
+        if (uiState.isSuccess) {
+            onSuccess()
+        }
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Registrar kilometraje", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface) },
+                title = { Text("Registrar Kilometraje", color = MaterialTheme.colorScheme.onSurface) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
@@ -60,7 +47,9 @@ fun RegisterMileageScreen(
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                )
             )
         },
         containerColor = MaterialTheme.colorScheme.background,
@@ -70,104 +59,70 @@ fun RegisterMileageScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = 24.dp),
+                .padding(horizontal = 24.dp)
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            Spacer(modifier = Modifier.height(8.dp))
-            
-            // Vehicle Info Card
+            Spacer(modifier = Modifier.height(16.dp))
+
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                border = CardDefaults.outlinedCardBorder()
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
             ) {
-                Column(modifier = Modifier.padding(20.dp)) {
-                    VehicleSummary(model = "Toyota Hilux", plate = "ABC-123")
+                Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Vehículo Asignado", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(
+                        text = uiState.vehicle?.let { "${it.marca} ${it.modelo}" } ?: "Sin vehículo asignado",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = uiState.vehicle?.placa ?: "No registrada",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                     
-                    Spacer(modifier = Modifier.height(16.dp))
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), color = MaterialTheme.colorScheme.outlineVariant)
                     
-                    Text("Kilometraje actual registrado", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text("125,430 km", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = AccentBlue)
+                    Text("Último Kilometraje", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(uiState.vehicle?.let { "${it.kilometraje_actual} km" } ?: "No disponible", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 }
             }
 
-            // Date Field
-            OutlinedTextField(
-                value = date,
-                onValueChange = { date = it },
-                label = { Text("Fecha") },
-                placeholder = { Text("27 Ago 2026", color = MaterialTheme.colorScheme.onSurfaceVariant) },
-                modifier = Modifier.fillMaxWidth(),
-                readOnly = true,
-                trailingIcon = { Icon(Icons.Default.CalendarToday, contentDescription = null, tint = AccentBlue) },
-                shape = RoundedCornerShape(16.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    focusedBorderColor = AccentBlue,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-                    focusedLabelColor = AccentBlue,
-                    unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+            FormTextField(
+                value = uiState.currentMileageInput,
+                onValueChange = viewModel::onMileageChange,
+                label = "Nuevo Kilometraje",
+                placeholder = "Ingrese el valor actual",
+                enabled = !uiState.isLoading,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                isError = uiState.validationErrors.containsKey("mileage"),
+                supportingText = uiState.validationErrors["mileage"]?.let { { Text(it) } }
             )
 
-            // Mileage Field
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(
-                    value = mileage,
-                    onValueChange = { mileage = it },
-                    label = { Text("Kilometraje actual") },
-                    placeholder = { Text("Ingrese el kilometraje (ej. 126,250)", color = MaterialTheme.colorScheme.onSurfaceVariant) },
-                    suffix = { Text("km", color = MaterialTheme.colorScheme.onSurface) },
-                    modifier = Modifier.fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                        focusedBorderColor = if (mileage.isNotEmpty() && !isMileageValid) semanticColors.statusRed else AccentBlue,
-                        unfocusedBorderColor = if (mileage.isNotEmpty() && !isMileageValid) semanticColors.statusRed else MaterialTheme.colorScheme.outline,
-                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-                        focusedLabelColor = if (mileage.isNotEmpty() && !isMileageValid) semanticColors.statusRed else AccentBlue,
-                        unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                )
-                
-                Text(
-                    text = "Último kilometraje registrado: 125,430 km",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                
-                if (mileage.isNotEmpty() && !isMileageValid) {
-                    Text(
-                        text = "El kilometraje debe ser mayor al último registro.",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = semanticColors.statusRed
-                    )
-                }
+            if (uiState.error != null) {
+                Text(text = uiState.error!!, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
             }
 
             Spacer(modifier = Modifier.weight(1f))
 
             Button(
-                onClick = { showConfirmation = true },
+                onClick = viewModel::registerMileage,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp)
                     .padding(bottom = 16.dp),
-                enabled = isMileageValid,
+                enabled = !uiState.isLoading && uiState.vehicle != null,
                 shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = AccentBlue,
-                    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant
-                )
+                colors = ButtonDefaults.buttonColors(containerColor = AccentBlue)
             ) {
-                Text("Registrar kilometraje", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                if (uiState.isLoading) {
+                    CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+                } else {
+                    Text("Registrar Kilometraje", fontWeight = FontWeight.Bold)
+                }
             }
         }
     }
