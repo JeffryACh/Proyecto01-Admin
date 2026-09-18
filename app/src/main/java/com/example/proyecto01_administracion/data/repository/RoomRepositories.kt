@@ -5,6 +5,7 @@ import com.example.proyecto01_administracion.data.local.entity.MaintenanceEviden
 import com.example.proyecto01_administracion.data.local.entity.RoleEntity
 import com.example.proyecto01_administracion.domain.models.*
 import com.example.proyecto01_administracion.domain.repositories.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
@@ -86,6 +87,7 @@ class RoomAlertRepository @Inject constructor(
     private val alertDao: AlertDao,
     private val recipientDao: AlertRecipientDao
 ) : AlertRepository {
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun getAlertsForUser(userId: String): Flow<List<Alert>> =
         recipientDao.observeByUser(userId).mapLatest { recipients ->
             recipients.mapNotNull { recipient -> alertDao.getById(recipient.alertId)?.toDomain() }
