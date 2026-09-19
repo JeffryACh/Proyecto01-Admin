@@ -2,8 +2,8 @@ package com.example.proyecto01_administracion.ui.fleet
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.proyecto01_administracion.CalculateFleetStatusUseCase
-import com.example.proyecto01_administracion.FleetStatus
+import com.example.proyecto01_administracion.domain.models.FleetStatus
+import com.example.proyecto01_administracion.domain.usecase.CalculateFleetStatusUseCase
 import com.example.proyecto01_administracion.data.local.dao.MaintenanceDao
 import com.example.proyecto01_administracion.data.local.dao.MaintenancePlanDao
 import com.example.proyecto01_administracion.domain.models.Vehicle
@@ -49,11 +49,16 @@ class FleetViewModel @Inject constructor(
         for (vehicle in vehicles.filter { it.estado == "Activo" }) {
             val plans = maintenancePlanDao.observeByClassification(vehicle.clasificacion).first()
             if (plans.isEmpty()) continue
-            val perPlan = plans.mapNotNull { plan ->
-                val last = maintenanceDao.getLatestByCategory(vehicle.id, plan.categoryId) ?: return@mapNotNull null
+            val perPlan = plans.map { plan ->
+                val lastMaintenance =
+                    maintenanceDao.getLatestByCategory(
+                        vehicle.id,
+                        plan.categoryId
+                    )
+
                 calculateStatus(
                     currentOdometer = vehicle.kilometraje_actual,
-                    lastMaintenanceOdometer = last.mileage,
+                    lastMaintenanceOdometer = lastMaintenance?.mileage,
                     maintenanceInterval = plan.intervalKm.toLong()
                 )
             }

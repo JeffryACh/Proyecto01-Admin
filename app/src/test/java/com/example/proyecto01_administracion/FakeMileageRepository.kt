@@ -1,18 +1,32 @@
 package com.example.proyecto01_administracion
 
-import com.example.proyecto01_administracion.domain.repository.MileageRepository
+import com.example.proyecto01_administracion.domain.models.MileageRecord
+import com.example.proyecto01_administracion.domain.repositories.MileageRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 
 class FakeMileageRepository : MileageRepository {
-    private val records = mutableListOf<Long>()
 
-    // Simula la base de datos devolviendo el último registro
-    override fun getLatestOdometer(): Long? {
-        return records.maxOrNull()
+    private val savedRecords =
+        mutableListOf<MileageRecord>()
+
+    val records: List<MileageRecord>
+        get() = savedRecords.toList()
+
+    override fun getMileageHistory(
+        vehicleId: String
+    ): Flow<List<MileageRecord>> {
+        return flowOf(
+            savedRecords.filter {
+                it.vehiculo_id == vehicleId
+            }
+        )
     }
 
-    // Simula el guardado en la nube
-    override fun register(odometerValue: Long): Result<Unit> {
-        records.add(odometerValue)
+    override suspend fun registerMileage(
+        record: MileageRecord
+    ): Result<Unit> {
+        savedRecords.add(record)
         return Result.success(Unit)
     }
 }

@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.proyecto01_administracion.ui.login.AuthViewModel
-import com.example.proyecto01_administracion.FleetStatus
+import com.example.proyecto01_administracion.domain.models.FleetStatus
 import java.text.SimpleDateFormat
 import java.util.Locale
 

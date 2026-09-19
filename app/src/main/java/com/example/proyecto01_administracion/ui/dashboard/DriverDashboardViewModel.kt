@@ -2,8 +2,8 @@ package com.example.proyecto01_administracion.ui.dashboard
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.proyecto01_administracion.CalculateFleetStatusUseCase
-import com.example.proyecto01_administracion.FleetStatus
+import com.example.proyecto01_administracion.domain.models.FleetStatus
+import com.example.proyecto01_administracion.domain.usecase.CalculateFleetStatusUseCase
 import com.example.proyecto01_administracion.data.auth.SessionManager
 import com.example.proyecto01_administracion.data.local.dao.MaintenanceDao
 import com.example.proyecto01_administracion.data.local.dao.MaintenancePlanDao
@@ -36,7 +36,7 @@ class DriverDashboardViewModel @Inject constructor(
     private val planDao: MaintenancePlanDao,
     private val maintenanceDao: MaintenanceDao,
     private val mileageDao: MileageRecordDao
-):ViewModel(){
+) : ViewModel() {
     private val _uiState=MutableStateFlow(DriverDashboardUiState(isLoading=true))
     val uiState:StateFlow<DriverDashboardUiState> = _uiState.asStateFlow()
     private val calc=CalculateFleetStatusUseCase()
@@ -53,7 +53,19 @@ class DriverDashboardViewModel @Inject constructor(
                 val maintenanceHistory = maintenanceDao.observeByVehicle(vehicle.id).first()
                 val recentMaintenance = maintenanceHistory.firstOrNull()?.toDomain()
                 val latestMileage = mileageDao.getLatest(vehicle.id)?.toDomain()
-                val statuses=plans.mapNotNull{p->maintenanceDao.getLatestByCategory(vehicle.id,p.categoryId)?.let{m->calc(vehicle.kilometraje_actual,m.mileage,p.intervalKm.toLong())}}
+                val statuses = plans.map { plan ->
+                    val maintenance =
+                        maintenanceDao.getLatestByCategory(
+                            vehicle.id,
+                            plan.categoryId
+                        )
+
+                    calc(
+                        currentOdometer = vehicle.kilometraje_actual,
+                        lastMaintenanceOdometer = maintenance?.mileage,
+                        maintenanceInterval = plan.intervalKm.toLong()
+                    )
+                }
                 val status=if(statuses.isEmpty()) null else when{
                     FleetStatus.MAINTENANCE_OVERDUE in statuses -> FleetStatus.MAINTENANCE_OVERDUE
                     FleetStatus.MAINTENANCE_DUE_SOON in statuses -> FleetStatus.MAINTENANCE_DUE_SOON

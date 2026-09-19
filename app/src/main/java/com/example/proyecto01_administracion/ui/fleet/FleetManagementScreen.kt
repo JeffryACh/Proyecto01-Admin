@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.proyecto01_administracion.domain.models.Vehicle
-import com.example.proyecto01_administracion.FleetStatus
+import com.example.proyecto01_administracion.domain.models.FleetStatus
 import com.example.proyecto01_administracion.ui.dashboard.VehicleSummary
 import com.example.proyecto01_administracion.ui.dashboard.AppFilterChip
 import com.example.proyecto01_administracion.ui.theme.*

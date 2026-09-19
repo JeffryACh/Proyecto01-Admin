@@ -2,8 +2,8 @@ package com.example.proyecto01_administracion.ui.dashboard
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.proyecto01_administracion.CalculateFleetStatusUseCase
-import com.example.proyecto01_administracion.FleetStatus
+import com.example.proyecto01_administracion.domain.models.FleetStatus
+import com.example.proyecto01_administracion.domain.usecase.CalculateFleetStatusUseCase
 import com.example.proyecto01_administracion.data.local.dao.MaintenanceDao
 import com.example.proyecto01_administracion.data.local.dao.MaintenanceCategoryDao
 import com.example.proyecto01_administracion.data.local.dao.MaintenancePlanDao
@@ -29,7 +29,7 @@ class DashboardViewModel @Inject constructor(
     private val planDao: MaintenancePlanDao,
     private val maintenanceDao: MaintenanceDao,
     private val categoryDao: MaintenanceCategoryDao
-):ViewModel(){
+) : ViewModel() {
     private val _uiState=MutableStateFlow(DashboardUiState(isLoading=true))
     val uiState:StateFlow<DashboardUiState> = _uiState.asStateFlow()
     private val calc=CalculateFleetStatusUseCase()
@@ -44,12 +44,32 @@ class DashboardViewModel @Inject constructor(
 
                     for (vehicle in vehicles.filter { it.estado == "Activo" }) {
                         val plans = planDao.observeByClassification(vehicle.clasificacion).first()
-                        val evaluatedPlans = plans.mapNotNull { plan ->
-                            maintenanceDao.getLatestByCategory(vehicle.id, plan.categoryId)?.let { maintenance ->
-                                val status = calc(vehicle.kilometraje_actual, maintenance.mileage, plan.intervalKm.toLong())
-                                val remainingKm = maintenance.mileage + plan.intervalKm.toLong() - vehicle.kilometraje_actual
-                                Triple(status, plan, remainingKm)
-                            }
+                        val evaluatedPlans = plans.map { plan ->
+                            val maintenance =
+                                maintenanceDao.getLatestByCategory(
+                                    vehicle.id,
+                                    plan.categoryId
+                                )
+
+                            val maintenanceBaseline =
+                                maintenance?.mileage ?: 0L
+
+                            val status = calc(
+                                currentOdometer = vehicle.kilometraje_actual,
+                                lastMaintenanceOdometer = maintenance?.mileage,
+                                maintenanceInterval = plan.intervalKm.toLong()
+                            )
+
+                            val remainingKm =
+                                maintenanceBaseline +
+                                        plan.intervalKm.toLong() -
+                                        vehicle.kilometraje_actual
+
+                            Triple(
+                                status,
+                                plan,
+                                remainingKm
+                            )
                         }
                         if (evaluatedPlans.isEmpty()) continue
 

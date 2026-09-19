@@ -2,8 +2,8 @@ package com.example.proyecto01_administracion.ui.dashboard
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.proyecto01_administracion.CalculateFleetStatusUseCase
-import com.example.proyecto01_administracion.FleetStatus
+import com.example.proyecto01_administracion.domain.models.FleetStatus
+import com.example.proyecto01_administracion.domain.usecase.CalculateFleetStatusUseCase
 import com.example.proyecto01_administracion.data.local.dao.MaintenanceDao
 import com.example.proyecto01_administracion.data.local.dao.MaintenancePlanDao
 import com.example.proyecto01_administracion.domain.repositories.VehicleRepository
@@ -31,7 +31,19 @@ class MechanicDashboardViewModel @Inject constructor(
                     var pending=0
                     for(v in vehicles.filter{it.estado=="Activo"}){
                         val plans=planDao.observeByClassification(v.clasificacion).first()
-                        val statuses=plans.mapNotNull{p->maintenanceDao.getLatestByCategory(v.id,p.categoryId)?.let{m->calc(v.kilometraje_actual,m.mileage,p.intervalKm.toLong())}}
+                        val statuses = plans.map { plan ->
+                            val maintenance =
+                                maintenanceDao.getLatestByCategory(
+                                    v.id,
+                                    plan.categoryId
+                                )
+
+                            calc(
+                                currentOdometer = v.kilometraje_actual,
+                                lastMaintenanceOdometer = maintenance?.mileage,
+                                maintenanceInterval = plan.intervalKm.toLong()
+                            )
+                        }
                         if(statuses.any{it==FleetStatus.MAINTENANCE_DUE_SOON||it==FleetStatus.MAINTENANCE_OVERDUE}) pending++
                     }
                     _uiState.update{it.copy(pendingCount=pending,completedCount=maintenances.size,isLoading=false,error=null)}

@@ -5,6 +5,9 @@ import com.example.proyecto01_administracion.domain.model.User
 import com.example.proyecto01_administracion.domain.model.UserRole
 import com.example.proyecto01_administracion.domain.usecase.RegisterMileageUseCase
 import com.example.proyecto01_administracion.domain.usecase.SignInUseCase
+import com.example.proyecto01_administracion.domain.models.MileageRecord
+import com.google.firebase.Timestamp
+import java.util.Date
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -13,45 +16,102 @@ import kotlinx.coroutines.test.runTest
 
 class RegisterMileageUseCaseTest {
 
-    private lateinit var fakeRepository: FakeMileageRepository
-    private lateinit var useCase: RegisterMileageUseCase
+    private lateinit var fakeRepository:
+            FakeMileageRepository
+
+    private lateinit var useCase:
+            RegisterMileageUseCase
 
     @Before
     fun setup() {
-        // Se ejecuta antes de cada test para limpiar la memoria
         fakeRepository = FakeMileageRepository()
-        useCase = RegisterMileageUseCase(fakeRepository)
+        useCase = RegisterMileageUseCase(
+            fakeRepository
+        )
     }
 
     @Test
-    fun odometro_negativo_retorna_fallo() {
-        val result = useCase(-50L)
+    fun kilometraje_negativo_retorna_fallo() = runTest {
+        val result = useCase(
+            createRecord(kilometraje = -50L)
+        )
 
         assertTrue(result.isFailure)
-        assertEquals("El kilometraje no puede ser negativo", result.exceptionOrNull()?.message)
+
+        assertEquals(
+            "El kilometraje no puede ser negativo",
+            result.exceptionOrNull()?.message
+        )
+
+        assertTrue(fakeRepository.records.isEmpty())
     }
 
     @Test
-    fun odometro_menor_al_anterior_retorna_fallo() {
-        // Arrange: Guardamos un kilometraje inicial de 10,000
-        fakeRepository.register(10000L)
+    fun vehiculo_vacio_retorna_fallo() = runTest {
+        val result = useCase(
+            createRecord(
+                kilometraje = 10_500L,
+                vehicleId = ""
+            )
+        )
 
-        // Act: Intentamos guardar 9,500
-        val result = useCase(9500L)
-
-        // Assert: Comprobamos que el sistema lo rechaza
         assertTrue(result.isFailure)
-        assertEquals("El kilometraje debe ser mayor al último registrado", result.exceptionOrNull()?.message)
+
+        assertEquals(
+            "Debe indicar el vehículo",
+            result.exceptionOrNull()?.message
+        )
+
+        assertTrue(fakeRepository.records.isEmpty())
     }
 
     @Test
-    fun odometro_correcto_guarda_el_registro_exitosamente() {
-        fakeRepository.register(10000L)
+    fun usuario_vacio_retorna_fallo() = runTest {
+        val result = useCase(
+            createRecord(
+                kilometraje = 10_500L,
+                userId = ""
+            )
+        )
 
-        // Intentamos guardar 10,500 (un valor válido)
-        val result = useCase(10500L)
+        assertTrue(result.isFailure)
+
+        assertEquals(
+            "Debe indicar el usuario",
+            result.exceptionOrNull()?.message
+        )
+
+        assertTrue(fakeRepository.records.isEmpty())
+    }
+
+    @Test
+    fun registro_valido_se_envia_al_repositorio() = runTest {
+        val record = createRecord(
+            kilometraje = 10_500L
+        )
+
+        val result = useCase(record)
 
         assertTrue(result.isSuccess)
+        assertEquals(1, fakeRepository.records.size)
+        assertEquals(
+            10_500L,
+            fakeRepository.records.first().kilometraje
+        )
+    }
+
+    private fun createRecord(
+        kilometraje: Long,
+        vehicleId: String = "vehicle-test",
+        userId: String = "user-test"
+    ): MileageRecord {
+        return MileageRecord(
+            id = "mileage-test",
+            vehiculo_id = vehicleId,
+            usuario_id = userId,
+            kilometraje = kilometraje,
+            fecha = Timestamp(Date(0L))
+        )
     }
 }
 
