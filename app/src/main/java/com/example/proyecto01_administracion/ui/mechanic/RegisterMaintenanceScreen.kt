@@ -1,7 +1,5 @@
 package com.example.proyecto01_administracion.ui.mechanic
 
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -33,6 +31,9 @@ import coil.compose.AsyncImage
 import com.example.proyecto01_administracion.ui.dashboard.FormTextField
 import com.example.proyecto01_administracion.ui.theme.*
 import com.example.proyecto01_administracion.ui.dashboard.AppChoiceChip
+import androidx.compose.ui.platform.LocalContext
+import android.Manifest
+import com.example.proyecto01_administracion.ui.mechanic.components.CameraCapture
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,10 +45,9 @@ fun RegisterMaintenanceScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     LaunchedEffect(plate) { viewModel.setVehicleFromPlate(plate) }
-    val photoLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetMultipleContents()
-    ) { uris ->
-        uris.forEach { viewModel.addEvidence(it) }
+
+    var showCamera by remember {
+        mutableStateOf(false)
     }
 
     LaunchedEffect(uiState.isSuccess) {
@@ -196,7 +196,9 @@ fun RegisterMaintenanceScreen(
                     Surface(
                         modifier = Modifier
                             .size(100.dp)
-                            .clickable { photoLauncher.launch("image/*") },
+                            .clickable {
+                                showCamera = true
+                            },
                         shape = RoundedCornerShape(16.dp),
                         color = MaterialTheme.colorScheme.surfaceVariant,
                         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
@@ -247,6 +249,19 @@ fun RegisterMaintenanceScreen(
                         }
                     }
                 }
+            }
+
+            if(showCamera){
+                CameraCapture(
+                    context = LocalContext.current,
+
+                    onPhotoCaptured = { uri ->
+
+                        viewModel.addEvidence(uri)
+
+                        showCamera = false
+                    }
+                )
             }
 
             if (uiState.error != null) {
