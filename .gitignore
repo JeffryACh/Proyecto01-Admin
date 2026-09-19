@@ -42,3 +42,10 @@ firebase.json
 /.claude
 /app/src/test
 /app/src/test
+/app/src/test
+/app/src/test
+/app/src/test
+/app/src/test
+/app/src/test
+app/src/test/java/com/example/proyecto01_administracion/FakeMileageRepository.kt
+app/src/test/java/com/example/proyecto01_administracion/RegisterMileageUseCaseTest.kt

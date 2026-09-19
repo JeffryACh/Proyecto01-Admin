@@ -24,13 +24,28 @@ android {
             optimization { enable = false }
         }
     }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+    kotlin {
+        compilerOptions {
+            freeCompilerArgs.add("-Xencoding=UTF-8")
+        }
     }
+
+    compileOptions {
+        encoding = "UTF-8"
+        sourceCompatibility = JavaVersion.VERSION_21 // O la versión que uses
+        targetCompatibility = JavaVersion.VERSION_21
+    }
+
     buildFeatures {
         compose = true
         buildConfig = true
+    }
+
+
+    testOptions {
+        unitTests.all {
+            it.jvmArgs("-Dnet.bytebuddy.experimental=true")
+        }
     }
 }
 
@@ -41,7 +56,8 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore")
     androidTestImplementation(libs.firebase.auth)
     testImplementation("junit:junit:4.13.2")
-    testImplementation("io.mockk:mockk:1.13.8")
+    testImplementation("io.mockk:mockk:1.13.11") // Revisa si hay una versión más nueva
+    testImplementation("io.mockk:mockk-agent-jvm:1.13.11")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
 // Opcional pero muy recomendada para probar StateFlow fácilmente:
     testImplementation("app.cash.turbine:turbine:1.0.0")
