@@ -1,10 +1,13 @@
 package com.example.proyecto01_administracion.data.repository
 
+import androidx.room.withTransaction
 import com.example.proyecto01_administracion.data.local.dao.*
+import com.example.proyecto01_administracion.data.local.database.AppDatabase
 import com.example.proyecto01_administracion.data.local.entity.MaintenanceEvidenceEntity
 import com.example.proyecto01_administracion.data.local.entity.RoleEntity
 import com.example.proyecto01_administracion.domain.models.*
 import com.example.proyecto01_administracion.domain.repositories.*
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -45,13 +48,76 @@ class RoomUserRepository @Inject constructor(
 
 @Singleton
 class RoomMileageRepository @Inject constructor(
-    private val mileageDao: MileageRecordDao
+    private val database: AppDatabase,
+    private val mileageDao: MileageRecordDao,
+    private val vehicleDao: VehicleDao
 ) : MileageRepository {
-    override fun getMileageHistory(vehicleId: String): Flow<List<MileageRecord>> =
-        mileageDao.observeHistory(vehicleId).map { list -> list.map { it.toDomain() } }
 
-    override suspend fun registerMileage(record: MileageRecord): Result<Unit> = runCatching {
-        mileageDao.upsert(record.toEntity())
+    override fun getMileageHistory(
+        vehicleId: String
+    ): Flow<List<MileageRecord>> {
+        return mileageDao.observeHistory(vehicleId).map { records ->
+            records.map { it.toDomain() }
+        }
+    }
+
+    override suspend fun registerMileage(
+        record: MileageRecord
+    ): Result<Unit> {
+        return try {
+            database.withTransaction {
+
+                require(record.vehiculo_id.isNotBlank()) {
+                    "Debe indicar el vehículo"
+                }
+
+                require(record.usuario_id.isNotBlank()) {
+                    "Debe indicar el usuario"
+                }
+
+                require(record.kilometraje >= 0) {
+                    "El kilometraje no puede ser negativo"
+                }
+
+                val vehicle = requireNotNull(
+                    vehicleDao.getById(record.vehiculo_id)
+                ) {
+                    "El vehículo no existe"
+                }
+
+                val highestRecordedMileage =
+                    mileageDao.getHighestMileage(
+                        record.vehiculo_id
+                    )
+
+                val previousMileage = maxOf(
+                    vehicle.currentMileage,
+                    highestRecordedMileage
+                        ?: vehicle.currentMileage
+                )
+
+                require(
+                    record.kilometraje > previousMileage
+                ) {
+                    "El kilometraje debe ser mayor a $previousMileage km"
+                }
+
+                mileageDao.upsert(
+                    record.toEntity()
+                )
+
+                vehicleDao.updateMileage(
+                    vehicleId = record.vehiculo_id,
+                    mileage = record.kilometraje
+                )
+            }
+
+            Result.success(Unit)
+        } catch (exception: CancellationException) {
+            throw exception
+        } catch (exception: Exception) {
+            Result.failure(exception)
+        }
     }
 }
 

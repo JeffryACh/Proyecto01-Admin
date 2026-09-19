@@ -3,6 +3,7 @@ package com.example.proyecto01_administracion
 import com.example.proyecto01_administracion.domain.model.AccountStatus
 import com.example.proyecto01_administracion.domain.model.User
 import com.example.proyecto01_administracion.domain.model.UserRole
+import com.example.proyecto01_administracion.domain.usecase.RegisterMileageUseCase
 import com.example.proyecto01_administracion.domain.usecase.SignInUseCase
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
