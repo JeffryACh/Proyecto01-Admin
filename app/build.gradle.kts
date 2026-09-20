@@ -50,11 +50,15 @@ android {
 }
 
 dependencies {
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
     implementation(platform("com.google.firebase:firebase-bom:34.19.0"))
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
     androidTestImplementation(libs.firebase.auth)
+    implementation("com.google.firebase:firebase-messaging")     // Firebase Cloud Messaging
+    implementation("com.google.firebase:firebase-storage")    // Firebase Cloud Storage
+    implementation("com.google.firebase:firebase-functions")    // Firebase Cloud Functions
     testImplementation("junit:junit:4.13.2")
     testImplementation("io.mockk:mockk:1.13.11") // Revisa si hay una versión más nueva
     testImplementation("io.mockk:mockk-agent-jvm:1.13.11")

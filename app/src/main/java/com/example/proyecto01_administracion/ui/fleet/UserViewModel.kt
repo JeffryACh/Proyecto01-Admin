@@ -10,13 +10,15 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.tasks.await
 
 data class UserFormUiState(
     val id: String = "",
     val nombre: String = "",
     val cedula: String = "",
     val correo: String = "",
-    val telefono: String = "",
+  val telefono: String = "",
     val rol_id: String = "",
     val numero_licencia: String? = null,
     val estado: String = "Activo",
@@ -25,6 +27,7 @@ data class UserFormUiState(
     val isLoading: Boolean = false,
     val error: String? = null,
     val isSuccess: Boolean = false,
+    val password: String = "",           // NUEVO: solo se usa al crear (no en edición)
     val validationErrors: Map<String, String> = emptyMap()
 )
 
@@ -91,7 +94,7 @@ class UserViewModel @Inject constructor(
         }
 
         val user = User(
-            id = s.id.ifBlank { UUID.randomUUID().toString() },
+            id = s.id,
             nombre = s.nombre.trim(),
             cedula = s.cedula.trim(),
             correo = email,

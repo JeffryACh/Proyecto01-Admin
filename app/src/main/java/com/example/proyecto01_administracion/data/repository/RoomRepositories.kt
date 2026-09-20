@@ -15,6 +15,9 @@ import kotlinx.coroutines.flow.mapLatest
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.tasks.await
+import com.google.firebase.auth.FirebaseAuth
 
 @Singleton
 class RoomVehicleRepository @Inject constructor(
@@ -30,7 +33,9 @@ class RoomVehicleRepository @Inject constructor(
 @Singleton
 class RoomUserRepository @Inject constructor(
     private val userDao: UserDao,
-    private val roleDao: RoleDao
+    private val roleDao: RoleDao,
+    private val firestore: FirebaseFirestore,
+    private val firebaseAuth: FirebaseAuth
 ) : UserRepository {
     override fun getUsers(): Flow<List<User>> = userDao.observeAll().map { list -> list.map { it.toDomain() } }
     override fun getUserById(id: String): Flow<User?> = userDao.observeById(id).map { it?.toDomain() }
@@ -41,7 +46,39 @@ class RoomUserRepository @Inject constructor(
             "FLEET_MANAGER" -> "Encargado de flota"
             else -> user.rol_id
         }))
+
+        // Si el id viene vacío, es un usuario nuevo: crea la cuenta en Auth primero
+        val finalUser = if (user.id.isBlank()) {
+            val authResult = firebaseAuth
+                .createUserWithEmailAndPassword(user.correo, user.password)
+                .await()
+            val uid = authResult.user?.uid
+                ?: throw IllegalStateException("No se pudo obtener el UID de Firebase Auth")
+            user.copy(id = uid)
+        } else {
+            user // edición: mantiene el id existente
+        }
+
         userDao.upsert(user.toEntity())
+
+        //Aca hacemos la subida con firebase
+        firestore.collection("users")
+            .document(user.id)
+            .set(
+                mapOf(
+                    "id" to user.id,
+                    "nombre" to user.nombre,
+                    "cedula" to user.cedula,
+                    "correo" to user.correo,
+                    "password" to user.password,
+                    "telefono" to user.telefono,
+                    "rol_id" to user.rol_id,
+                    "numero_licencia" to user.numero_licencia,
+                    "estado" to user.estado,
+                    "foto_url" to user.foto_url
+                )
+            )
+            .await()
     }
     override fun getRoles(): Flow<List<Role>> = roleDao.observeAll().map { list -> list.map { it.toDomain() } }
 }
