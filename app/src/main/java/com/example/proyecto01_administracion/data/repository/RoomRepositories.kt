@@ -61,6 +61,21 @@ class RoomMileageRepository @Inject constructor(
         }
     }
 
+    override suspend fun getLastMileage(
+        vehicleId: String
+    ): Long? {
+        val vehicleMileage =
+            vehicleDao.getById(vehicleId)?.currentMileage
+
+        val highestRecordedMileage =
+            mileageDao.getHighestMileage(vehicleId)
+
+        return listOfNotNull(
+            vehicleMileage,
+            highestRecordedMileage
+        ).maxOrNull()
+    }
+
     override suspend fun registerMileage(
         record: MileageRecord
     ): Result<Unit> {

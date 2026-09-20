@@ -2,6 +2,7 @@ package com.example.proyecto01_administracion.domain.usecase
 
 import com.example.proyecto01_administracion.domain.models.MileageRecord
 import com.example.proyecto01_administracion.domain.repositories.MileageRepository
+import kotlinx.coroutines.CancellationException
 import javax.inject.Inject
 
 class RegisterMileageUseCase @Inject constructor(
@@ -36,6 +37,28 @@ class RegisterMileageUseCase @Inject constructor(
             )
         }
 
-        return repository.registerMileage(record)
+        return try {
+            val previousMileage =
+                repository.getLastMileage(
+                    record.vehiculo_id
+                )
+
+            if (
+                previousMileage != null &&
+                record.kilometraje <= previousMileage
+            ) {
+                Result.failure(
+                    IllegalArgumentException(
+                        "El kilometraje debe ser mayor a $previousMileage km"
+                    )
+                )
+            } else {
+                repository.registerMileage(record)
+            }
+        } catch (exception: CancellationException) {
+            throw exception
+        } catch (exception: Exception) {
+            Result.failure(exception)
+        }
     }
 }

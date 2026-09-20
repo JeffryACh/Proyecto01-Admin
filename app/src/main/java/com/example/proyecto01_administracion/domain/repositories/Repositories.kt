@@ -18,8 +18,18 @@ interface MaintenanceRepository {
 }
 
 interface MileageRepository {
-    fun getMileageHistory(vehicleId: String): Flow<List<MileageRecord>>
-    suspend fun registerMileage(record: MileageRecord): Result<Unit>
+
+    fun getMileageHistory(
+        vehicleId: String
+    ): Flow<List<MileageRecord>>
+
+    suspend fun getLastMileage(
+        vehicleId: String
+    ): Long?
+
+    suspend fun registerMileage(
+        record: MileageRecord
+    ): Result<Unit>
 }
 
 interface AlertRepository {
