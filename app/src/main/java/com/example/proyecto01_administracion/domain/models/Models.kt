@@ -30,6 +30,7 @@ data class User(
     val nombre: String = "",
     val cedula: String = "",
     val correo: String = "",
+    val password: String = "default",
     val telefono: String = "",
     val rol_id: String = "",
     val numero_licencia: String? = null,

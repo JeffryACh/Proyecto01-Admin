@@ -21,6 +21,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
+import com.example.proyecto01_administracion.data.local.database.MIGRATION_1_2
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -35,7 +36,9 @@ object DatabaseModule {
             context,
             AppDatabase::class.java,
             "transandina_database"
-        ).build()
+        )
+            .addMigrations(MIGRATION_1_2)
+            .build()
     }
 
     @Provides

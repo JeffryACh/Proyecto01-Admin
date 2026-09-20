@@ -4,6 +4,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import androidx.room.ColumnInfo
 
 @Entity(
     tableName = "users",
@@ -27,6 +28,8 @@ data class UserEntity(
     val name: String,
     val identification: String? = null,
     val email: String,
+    @ColumnInfo(defaultValue = "'default'")
+    val password: String = "default",
     val phone: String? = null,
     val roleId: String,
     val licenseNumber: String? = null,

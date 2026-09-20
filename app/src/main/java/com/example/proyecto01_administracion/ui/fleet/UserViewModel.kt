@@ -95,6 +95,7 @@ class UserViewModel @Inject constructor(
             nombre = s.nombre.trim(),
             cedula = s.cedula.trim(),
             correo = email,
+            password = "default",
             telefono = s.telefono.trim(),
             rol_id = s.rol_id,
             numero_licencia = if (s.rol_id == "DRIVER") s.numero_licencia?.trim() else null,

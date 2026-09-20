@@ -43,7 +43,7 @@ import com.example.proyecto01_administracion.data.local.entity.VehicleEntity
         AlertEntity::class,
         AlertRecipientEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 @TypeConverters(RoomConverters::class)
