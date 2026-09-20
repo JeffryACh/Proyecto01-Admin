@@ -108,6 +108,15 @@ data class MaintenancePlan(
     val intervalo_dias: Int = 0
 )
 
+data class MaintenanceReport(
+    val totalCost: Double = 0.0,
+    val maintenanceCount: Int = 0,
+    val preventivePercentage: Int = 0,
+    val correctivePercentage: Int = 0,
+    val predictivePercentage: Int = 0,
+    val costByVehicleId: Map<String, Double> = emptyMap()
+)
+
 data class Alert(
     val id: String = "",
     val vehiculo_id: String = "",

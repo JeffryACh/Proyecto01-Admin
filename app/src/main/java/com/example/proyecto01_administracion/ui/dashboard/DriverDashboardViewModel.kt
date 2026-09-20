@@ -35,11 +35,12 @@ class DriverDashboardViewModel @Inject constructor(
     private val vehicleRepository: VehicleRepository,
     private val planDao: MaintenancePlanDao,
     private val maintenanceDao: MaintenanceDao,
-    private val mileageDao: MileageRecordDao
+    private val mileageDao: MileageRecordDao,
+    private val calc: CalculateFleetStatusUseCase
 ) : ViewModel() {
     private val _uiState=MutableStateFlow(DriverDashboardUiState(isLoading=true))
     val uiState:StateFlow<DriverDashboardUiState> = _uiState.asStateFlow()
-    private val calc=CalculateFleetStatusUseCase()
+
     init{ loadData() }
 
     private fun loadData(){

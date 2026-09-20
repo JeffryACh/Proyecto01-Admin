@@ -142,6 +142,13 @@ class RoomMaintenanceRepository @Inject constructor(
     private val categoryDao: MaintenanceCategoryDao,
     private val evidenceDao: MaintenanceEvidenceDao
 ) : MaintenanceRepository {
+    override fun getAllMaintenances():
+            Flow<List<Maintenance>> {
+        return maintenanceDao.observeAll().map { records ->
+            records.map { it.toDomain() }
+        }
+    }
+
     override fun getMaintenancesByVehicle(vehicleId: String): Flow<List<Maintenance>> =
         maintenanceDao.observeByVehicle(vehicleId).map { list -> list.map { it.toDomain() } }
 

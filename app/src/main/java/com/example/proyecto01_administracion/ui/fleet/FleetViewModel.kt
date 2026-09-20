@@ -30,11 +30,11 @@ data class FleetUiState(
 class FleetViewModel @Inject constructor(
     private val vehicleRepository: VehicleRepository,
     private val maintenancePlanDao: MaintenancePlanDao,
-    private val maintenanceDao: MaintenanceDao
+    private val maintenanceDao: MaintenanceDao,
+    private val calc: CalculateFleetStatusUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(FleetUiState(isLoading = true))
     val uiState: StateFlow<FleetUiState> = _uiState.asStateFlow()
-    private val calculateStatus = CalculateFleetStatusUseCase()
 
     init {
         viewModelScope.launch {
@@ -56,7 +56,7 @@ class FleetViewModel @Inject constructor(
                         plan.categoryId
                     )
 
-                calculateStatus(
+                calc(
                     currentOdometer = vehicle.kilometraje_actual,
                     lastMaintenanceOdometer = lastMaintenance?.mileage,
                     maintenanceInterval = plan.intervalKm.toLong()

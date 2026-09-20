@@ -18,11 +18,12 @@ data class MechanicDashboardUiState(val pendingCount:Int=0,val completedCount:In
 class MechanicDashboardViewModel @Inject constructor(
     private val vehicleRepository: VehicleRepository,
     private val planDao: MaintenancePlanDao,
-    private val maintenanceDao: MaintenanceDao
-):ViewModel(){
+    private val maintenanceDao: MaintenanceDao,
+    private val calc: CalculateFleetStatusUseCase
+) : ViewModel() {
     private val _uiState=MutableStateFlow(MechanicDashboardUiState(isLoading=true))
     val uiState:StateFlow<MechanicDashboardUiState> = _uiState.asStateFlow()
-    private val calc=CalculateFleetStatusUseCase()
+
     init{
         viewModelScope.launch{
             combine(vehicleRepository.getVehicles(),maintenanceDao.observeAll()){vehicles,maintenances->vehicles to maintenances}

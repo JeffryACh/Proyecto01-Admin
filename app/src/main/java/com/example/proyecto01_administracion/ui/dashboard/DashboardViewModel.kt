@@ -28,11 +28,11 @@ class DashboardViewModel @Inject constructor(
     private val vehicleRepository: VehicleRepository,
     private val planDao: MaintenancePlanDao,
     private val maintenanceDao: MaintenanceDao,
-    private val categoryDao: MaintenanceCategoryDao
+    private val categoryDao: MaintenanceCategoryDao,
+    private val calc: CalculateFleetStatusUseCase
 ) : ViewModel() {
     private val _uiState=MutableStateFlow(DashboardUiState(isLoading=true))
     val uiState:StateFlow<DashboardUiState> = _uiState.asStateFlow()
-    private val calc=CalculateFleetStatusUseCase()
 
     init{
         viewModelScope.launch{

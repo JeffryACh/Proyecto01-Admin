@@ -12,8 +12,18 @@ interface VehicleRepository {
 }
 
 interface MaintenanceRepository {
-    fun getMaintenancesByVehicle(vehicleId: String): Flow<List<Maintenance>>
-    suspend fun saveMaintenance(maintenance: Maintenance, evidences: List<String>): Result<Unit>
+
+    fun getAllMaintenances(): Flow<List<Maintenance>>
+
+    fun getMaintenancesByVehicle(
+        vehicleId: String
+    ): Flow<List<Maintenance>>
+
+    suspend fun saveMaintenance(
+        maintenance: Maintenance,
+        evidences: List<String>
+    ): Result<Unit>
+
     fun getCategories(): Flow<List<MaintenanceCategory>>
 }
 
