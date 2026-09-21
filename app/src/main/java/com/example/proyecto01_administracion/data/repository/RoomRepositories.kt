@@ -119,7 +119,7 @@ class RoomUserRepository @Inject constructor(
                     "correo" to finalUser.correo,
                     "password" to finalUser.password,
                     "telefono" to finalUser.telefono,
-                    "rol_id" to finalUser.rol_id,
+                    "rol_id" to firestore.collection("roles").document(finalUser.rol_id),
                     "numero_licencia" to finalUser.numero_licencia,
                     "estado" to finalUser.estado,
                     "foto_url" to finalUser.foto_url
@@ -254,15 +254,15 @@ class RoomMaintenanceRepository @Inject constructor(
         maintenanceRef.set(
             mapOf(
                 "id" to maintenance.id,
-                "vehiculo_id" to maintenance.vehiculo_id,
+                "vehiculo_id" to firestore.collection("vehiculos").document(maintenance.vehiculo_id),
                 "tipo" to maintenance.tipo,
-                "categoria_id" to maintenance.categoria_id,
+                "categoria_id" to firestore.collection("CategoriaMantenimiento").document(maintenance.categoria_id),
                 "fecha" to maintenance.fecha,
                 "taller" to maintenance.taller,
                 "kilometraje" to maintenance.kilometraje,
                 "costo" to maintenance.costo,
                 "descripcion" to maintenance.descripcion,
-                "registrado_por" to maintenance.registrado_por
+                "registrado_por" to firestore.collection("users").document(maintenance.registrado_por)
             )
         ).await()
 
