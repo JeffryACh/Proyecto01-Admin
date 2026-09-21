@@ -63,19 +63,19 @@ class RoomUserRepository @Inject constructor(
 
         //Aca hacemos la subida con firebase
         firestore.collection("users")
-            .document(user.id)
+            .document(finalUser.id)
             .set(
                 mapOf(
                     "id" to finalUser.id,
-                    "nombre" to user.nombre,
-                    "cedula" to user.cedula,
-                    "correo" to user.correo,
-                    "password" to user.password,
-                    "telefono" to user.telefono,
-                    "rol_id" to user.rol_id,
-                    "numero_licencia" to user.numero_licencia,
-                    "estado" to user.estado,
-                    "foto_url" to user.foto_url
+                    "nombre" to finalUser.nombre,
+                    "cedula" to finalUser.cedula,
+                    "correo" to finalUser.correo,
+                    "password" to finalUser.password,
+                    "telefono" to finalUser.telefono,
+                    "rol_id" to finalUser.rol_id,
+                    "numero_licencia" to finalUser.numero_licencia,
+                    "estado" to finalUser.estado,
+                    "foto_url" to finalUser.foto_url
                 )
             )
             .await()
