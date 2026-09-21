@@ -22,13 +22,59 @@ import com.example.proyecto01_administracion.data.local.entity.MaintenanceCatego
 
 @Singleton
 class RoomVehicleRepository @Inject constructor(
-    private val vehicleDao: VehicleDao
+    private val vehicleDao: VehicleDao,
+    private val firestore: FirebaseFirestore   // <- nuevo
 ) : VehicleRepository {
     override fun getVehicles(): Flow<List<Vehicle>> = vehicleDao.observeAll().map { list -> list.map { it.toDomain() } }
     override fun getVehicleById(id: String): Flow<Vehicle?> = vehicleDao.observeById(id).map { it?.toDomain() }
     override suspend fun findVehicleByPlate(plate: String): Vehicle? = vehicleDao.getByPlate(plate)?.toDomain()
-    override suspend fun saveVehicle(vehicle: Vehicle): Result<Unit> = runCatching { vehicleDao.upsert(vehicle.toEntity()) }
-    override suspend fun updateVehicleMileage(vehicleId: String, newMileage: Long): Result<Unit> = runCatching { vehicleDao.updateMileage(vehicleId, newMileage) }
+
+    override suspend fun saveVehicle(vehicle: Vehicle): Result<Unit> = runCatching {
+        vehicleDao.upsert(vehicle.toEntity())
+
+        firestore.collection("vehicles")
+            .document(vehicle.id)
+            .set(
+                mapOf(
+                    "placa" to vehicle.placa,
+                    "marca" to vehicle.marca,
+                    "modelo" to vehicle.modelo,
+                    "anio" to vehicle.anio,
+                    "tipo" to vehicle.tipo,
+                    "clasificacion" to vehicle.clasificacion,
+                    "capacidad" to vehicle.capacidad,
+                    "kilometrajeActual" to vehicle.kilometraje_actual,
+                    "estado" to vehicle.estado
+                )
+            )
+            .await()
+    }
+
+    override suspend fun updateVehicleMileage(vehicleId: String, newMileage: Long): Result<Unit> = runCatching {
+        vehicleDao.updateMileage(vehicleId, newMileage)
+        firestore.collection("vehicles").document(vehicleId)
+            .update("kilometrajeActual", newMileage)
+            .await()
+    }
+
+    override suspend fun syncVehicles(): Result<Unit> = runCatching {
+        val snapshot = firestore.collection("vehicles").get().await()
+        val vehicles = snapshot.documents.map { doc ->
+            Vehicle(
+                id = doc.id,
+                placa = doc.getString("placa") ?: "",
+                marca = doc.getString("marca") ?: "",
+                modelo = doc.getString("modelo") ?: "",
+                anio = (doc.getLong("anio") ?: 0L).toInt(),
+                tipo = doc.getString("tipo") ?: "",
+                clasificacion = doc.getString("clasificacion") ?: "",
+                capacidad = (doc.getDouble("capacidad") ?: 0.0).toFloat(),
+                kilometraje_actual = doc.getLong("kilometrajeActual") ?: 0L,
+                estado = doc.getString("estado") ?: "Activo"
+            )
+        }
+        vehicleDao.upsertAll(vehicles.map { it.toEntity() })
+    }
 }
 
 @Singleton

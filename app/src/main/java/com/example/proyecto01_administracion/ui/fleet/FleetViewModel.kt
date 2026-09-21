@@ -38,6 +38,9 @@ class FleetViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
+            vehicleRepository.syncVehicles()
+        }
+        viewModelScope.launch {
             vehicleRepository.getVehicles()
                 .catch { e -> _uiState.update { it.copy(isLoading = false, error = e.message ?: "No se pudo cargar la flota") } }
                 .collect { vehicles -> refreshStatuses(vehicles) }

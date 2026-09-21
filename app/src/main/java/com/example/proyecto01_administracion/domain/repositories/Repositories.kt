@@ -9,6 +9,7 @@ interface VehicleRepository {
     suspend fun findVehicleByPlate(plate: String): Vehicle?
     suspend fun saveVehicle(vehicle: Vehicle): Result<Unit>
     suspend fun updateVehicleMileage(vehicleId: String, newMileage: Long): Result<Unit>
+    suspend fun syncVehicles(): Result<Unit>
 }
 
 interface MaintenanceRepository {
