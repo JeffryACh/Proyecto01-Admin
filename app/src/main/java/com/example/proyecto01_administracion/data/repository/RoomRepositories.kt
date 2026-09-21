@@ -18,6 +18,7 @@ import javax.inject.Singleton
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import com.google.firebase.auth.FirebaseAuth
+import com.example.proyecto01_administracion.data.local.entity.MaintenanceCategoryEntity
 
 @Singleton
 class RoomVehicleRepository @Inject constructor(
@@ -230,6 +231,17 @@ class RoomMaintenanceRepository @Inject constructor(
                 )
                 .await()
         }
+    }
+
+    override suspend fun syncCategories(): Result<Unit> = runCatching {
+        val snapshot = firestore.collection("CategoriaMantenimiento").get().await()
+        val categories = snapshot.documents.map { doc ->
+            MaintenanceCategoryEntity(
+                id = doc.id,
+                name = doc.getString("nombre") ?: ""
+            )
+        }
+        categoryDao.upsertAll(categories)
     }
 
     override fun getCategories(): Flow<List<MaintenanceCategory>> =

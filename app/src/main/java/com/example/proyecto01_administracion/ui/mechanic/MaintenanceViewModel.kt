@@ -44,6 +44,9 @@ class MaintenanceViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
+            maintenanceRepository.syncCategories()   // <- nuevo, sincroniza primero
+        }
+        viewModelScope.launch {
             maintenanceRepository.getCategories()
                 .catch { e -> _uiState.update { it.copy(isLoading = false, error = e.message ?: "No se pudieron cargar las categorías") } }
                 .collect { categories -> _uiState.update { it.copy(categorias = categories, isLoading = false, error = null) } }

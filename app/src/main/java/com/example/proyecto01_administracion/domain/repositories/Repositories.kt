@@ -25,6 +25,8 @@ interface MaintenanceRepository {
     ): Result<Unit>
 
     fun getCategories(): Flow<List<MaintenanceCategory>>
+
+    suspend fun syncCategories(): Result<Unit>
 }
 
 interface MileageRepository {
