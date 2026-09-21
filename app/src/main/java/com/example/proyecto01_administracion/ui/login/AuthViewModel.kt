@@ -6,12 +6,15 @@ import com.example.proyecto01_administracion.BuildConfig
 import com.example.proyecto01_administracion.data.auth.SessionManager
 import com.example.proyecto01_administracion.domain.models.User
 import com.example.proyecto01_administracion.domain.repositories.UserRepository
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 data class LoginUiState(
@@ -27,7 +30,9 @@ data class LoginUiState(
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val sessionManager: SessionManager,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val firebaseAuth: FirebaseAuth,
+    private val firestore: FirebaseFirestore
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
@@ -44,6 +49,7 @@ class AuthViewModel @Inject constructor(
         }
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
+
             if (BuildConfig.DEBUG) {
                 val debugUser = checkDebugCredentials(state.email.trim(), state.password)
                 if (debugUser != null) {
@@ -57,19 +63,51 @@ class AuthViewModel @Inject constructor(
                     return@launch
                 }
             }
-            // El repositorio AuthRepository definido en la nueva capa domain todavía no tiene implementación Firebase.
-            _uiState.update { it.copy(isLoading = false, error = "Autenticación remota aún no implementada. Usa credenciales DEBUG.") }
+
+            // Login real contra Firebase Auth
+            runCatching {
+                val authResult = firebaseAuth
+                    .signInWithEmailAndPassword(state.email.trim(), state.password)
+                    .await()
+                val uid = authResult.user?.uid
+                    ?: throw IllegalStateException("No se pudo obtener el usuario autenticado")
+
+                val snapshot = firestore.collection("users").document(uid).get().await()
+                val user = snapshot.toObject(User::class.java)
+                    ?: throw IllegalStateException("No se encontró el perfil del usuario")
+
+                user
+            }.fold(
+                onSuccess = { user ->
+                    sessionManager.setCurrentUser(user)
+                    _uiState.update { it.copy(isLoading = false) }
+                },
+                onFailure = { e ->
+                    _uiState.update { it.copy(isLoading = false, error = e.message ?: "No se pudo iniciar sesión") }
+                }
+            )
         }
     }
 
-    fun logout() = sessionManager.clearSession()
+    fun logout() {
+        firebaseAuth.signOut()
+        sessionManager.clearSession()
+    }
 
     fun sendRecoveryEmail() {
         if (_uiState.value.email.isBlank()) {
             _uiState.update { it.copy(error = "El correo es obligatorio") }
             return
         }
-        _uiState.update { it.copy(error = "Recuperación de contraseña aún no conectada a AuthRepository") }
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            runCatching {
+                firebaseAuth.sendPasswordResetEmail(_uiState.value.email.trim()).await()
+            }.fold(
+                onSuccess = { _uiState.update { it.copy(isLoading = false, isRecoveryEmailSent = true) } },
+                onFailure = { e -> _uiState.update { it.copy(isLoading = false, error = e.message ?: "No se pudo enviar el correo de recuperación") } }
+            )
+        }
     }
 
     fun updateProfile(name: String, phone: String, cedula: String) {
