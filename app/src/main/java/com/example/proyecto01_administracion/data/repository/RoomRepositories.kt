@@ -59,14 +59,14 @@ class RoomUserRepository @Inject constructor(
             user // edición: mantiene el id existente
         }
 
-        userDao.upsert(user.toEntity())
+        userDao.upsert(finalUser.toEntity())
 
         //Aca hacemos la subida con firebase
         firestore.collection("users")
             .document(user.id)
             .set(
                 mapOf(
-                    "id" to user.id,
+                    "id" to finalUser.id,
                     "nombre" to user.nombre,
                     "cedula" to user.cedula,
                     "correo" to user.correo,
@@ -177,7 +177,8 @@ class RoomMileageRepository @Inject constructor(
 class RoomMaintenanceRepository @Inject constructor(
     private val maintenanceDao: MaintenanceDao,
     private val categoryDao: MaintenanceCategoryDao,
-    private val evidenceDao: MaintenanceEvidenceDao
+    private val evidenceDao: MaintenanceEvidenceDao,
+    private val firestore: FirebaseFirestore
 ) : MaintenanceRepository {
     override fun getAllMaintenances():
             Flow<List<Maintenance>> {
@@ -200,6 +201,34 @@ class RoomMaintenanceRepository @Inject constructor(
                     order = index
                 )
             })
+        }
+
+        val maintenanceRef = firestore.collection("Mantenimiento").document(maintenance.id)
+        maintenanceRef.set(
+            mapOf(
+                "id" to maintenance.id,
+                "vehiculo_id" to maintenance.vehiculo_id,
+                "tipo" to maintenance.tipo,
+                "categoria_id" to maintenance.categoria_id,
+                "fecha" to maintenance.fecha,
+                "taller" to maintenance.taller,
+                "kilometraje" to maintenance.kilometraje,
+                "costo" to maintenance.costo,
+                "descripcion" to maintenance.descripcion,
+                "registrado_por" to maintenance.registrado_por
+            )
+        ).await()
+
+        evidences.forEachIndexed { index, url ->
+            firestore.collection("maintenanceEvidence")
+                .add(
+                    mapOf(
+                        "IDMaintenance" to maintenanceRef,
+                        "fileURL" to url,
+                        "order" to index
+                    )
+                )
+                .await()
         }
     }
 
